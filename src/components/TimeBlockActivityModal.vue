@@ -7,16 +7,32 @@ import {
   TransitionChild,
   TransitionRoot,
 } from "@headlessui/vue";
-import { CheckIcon } from "@heroicons/vue/24/outline";
+import { ClockIcon } from "@heroicons/vue/24/outline";
+import type { Activity } from "@/components/DayView.vue";
 
 interface Props {
   open: boolean;
 }
 defineProps<Props>();
-const emit = defineEmits(["update:open"]);
+const emit = defineEmits(["update:open", "addTimeBlock"]);
+const activityTimeBlock = ref<Activity>({
+  name: "",
+  start: new Date().toLocaleDateString(),
+  end: new Date(Date.now() + 1000 * 60 * 60).toLocaleDateString(), // 1 hour from now
+  color: "bg-blue-500",
+});
 
 function close() {
   emit("update:open", false);
+}
+
+function addTimeBlock() {
+  emit("addTimeBlock", activityTimeBlock.value);
+}
+
+function submit() {
+  addTimeBlock();
+  close();
 }
 </script>
 <template>
@@ -50,13 +66,13 @@ function close() {
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel
-              class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
+              class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
             >
               <div>
                 <div
                   class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
                 >
-                  <CheckIcon
+                  <ClockIcon
                     class="h-6 w-6 text-green-600"
                     aria-hidden="true"
                   />
@@ -65,12 +81,70 @@ function close() {
                   <DialogTitle
                     as="h3"
                     class="text-base font-semibold leading-6 text-gray-900"
-                    >Payment successful</DialogTitle
+                    >Time block an activity</DialogTitle
                   >
                   <div class="mt-2">
                     <p class="text-sm text-gray-500">
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Consequatur amet labore.
+                      Allocate time to an activity you intend to do.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mt-8">
+                  <div>
+                    <label
+                      for="email"
+                      class="block text-sm font-medium leading-6 text-gray-900"
+                      >Name</label
+                    >
+                    <div class="mt-2">
+                      <input
+                        id="name"
+                        v-model="activityTimeBlock.name"
+                        type="text"
+                        name="activity name"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder="Read Pride and prejudice"
+                        aria-describedby="name-description"
+                      />
+                    </div>
+                    <p id="name-description" class="mt-2 text-sm text-gray-500">
+                      The name of the time block.
+                    </p>
+                  </div>
+                  <div>
+                    <label
+                      for="email"
+                      class="block text-sm font-medium leading-6 text-gray-900"
+                      >Start</label
+                    >
+                    <div class="mt-2">
+                      <input
+                        id="start-time"
+                        v-model="activityTimeBlock.start"
+                        type="datetime-local"
+                        name="start-time"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder=""
+                        aria-describedby="start-time-description"
+                      />
+                    </div>
+                    <p id="name-description" class="mt-2 text-sm text-gray-500">
+                      The end time of time block.
+                    </p>
+                    <div class="mt-2">
+                      <input
+                        id="end-time"
+                        v-model="activityTimeBlock.end"
+                        type="datetime-local"
+                        name="end-time"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder=""
+                        aria-describedby="end-time-description"
+                      />
+                    </div>
+                    <p id="name-description" class="mt-2 text-sm text-gray-500">
+                      The start time of time block.
                     </p>
                   </div>
                 </div>
@@ -79,9 +153,9 @@ function close() {
                 <button
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  @click="close"
+                  @click="submit"
                 >
-                  Go back to dashboard
+                  Add time block
                 </button>
               </div>
             </DialogPanel>

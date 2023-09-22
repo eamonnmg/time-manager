@@ -6,14 +6,9 @@ import {
   ChevronDownIcon,
   EllipsisHorizontalIcon,
 } from "@heroicons/vue/20/solid";
-import TimeBlockActivityModal from "@/components/TimeBlockActivityModal.vue";
-import { ref } from "vue";
-
-const showTimeBlockActivityModal = ref(false);
 </script>
 
 <template>
-  <TimeBlockActivityModal v-model:open="showTimeBlockActivityModal" />
   <header
     class="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4"
   >
@@ -122,13 +117,7 @@ const showTimeBlockActivityModal = ref(false);
           </transition>
         </Menu>
         <div class="ml-6 h-6 w-px bg-gray-300" />
-        <button
-          type="button"
-          class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-          @click="showTimeBlockActivityModal = true"
-        >
-          Add timeblock
-        </button>
+        <slot> </slot>
       </div>
       <Menu as="div" class="relative ml-6 md:hidden">
         <MenuButton

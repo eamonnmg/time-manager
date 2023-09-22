@@ -6,6 +6,7 @@ import DayView, { Activity } from "@/components/DayView.vue";
 import TimeBlockActivityModal from "@/components/TimeBlockActivityModal.vue";
 
 const activitiesData = ref<Activity>([]);
+const showTimeBlockActivityModal = ref(false);
 
 const days = [
   { date: "2021-12-27" },
@@ -51,11 +52,28 @@ const days = [
   { date: "2022-02-05" },
   { date: "2022-02-06" },
 ];
+
+function addTimeBlock(timeblock: Activity) {
+  activitiesData.value.push(timeblock);
+}
 </script>
 
 <template>
+  <TimeBlockActivityModal
+    v-if="showTimeBlockActivityModal"
+    v-model:open="showTimeBlockActivityModal"
+    @add-time-block="addTimeBlock"
+  />
   <div class="flex h-full flex-col">
-    <AppHeader />
+    <AppHeader>
+      <button
+        type="button"
+        class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+        @click="showTimeBlockActivityModal = true"
+      >
+        Add timeblock
+      </button>
+    </AppHeader>
     <div class="isolate flex flex-auto overflow-hidden bg-white">
       <DayView :activities-data="activitiesData" />
       <div

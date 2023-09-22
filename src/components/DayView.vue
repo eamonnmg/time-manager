@@ -3,8 +3,8 @@ import { computed, onMounted, ref } from "vue";
 
 export interface Activity {
   name: string;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
   color: string;
 }
 
@@ -14,24 +14,24 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   activitiesData: () => [
-    {
-      name: "Breakfast",
-      start: new Date(2022, 0, 22, 6),
-      end: new Date(2022, 0, 22, 7),
-      color: "bg-blue-50",
-    },
-    {
-      name: "Flight to Paris",
-      start: new Date(2022, 0, 22, 7, 30),
-      end: new Date(2022, 0, 22, 8, 20),
-      color: "bg-pink-50",
-    },
-    {
-      name: "Sightseeing",
-      start: new Date(2022, 0, 22, 11),
-      end: new Date(2022, 0, 22, 15),
-      color: "bg-indigo-50",
-    },
+    // {
+    //   name: "Breakfast",
+    //   start: new Date(2022, 0, 22, 6).toDateString(),
+    //   end: new Date(2022, 0, 22, 7),
+    //   color: "bg-blue-50",
+    // },
+    // {
+    //   name: "Flight to Paris",
+    //   start: new Date(2022, 0, 22, 7, 30),
+    //   end: new Date(2022, 0, 22, 8, 20),
+    //   color: "bg-pink-50",
+    // },
+    // {
+    //   name: "Sightseeing",
+    //   start: new Date(2022, 0, 22, 11),
+    //   end: new Date(2022, 0, 22, 15),
+    //   color: "bg-indigo-50",
+    // },
   ],
 });
 
@@ -47,16 +47,16 @@ const containerOffset = ref(null);
 const rows = 288; // break 24 hour day into 288 5 minute segments
 
 function activityToActivityUi(activity: Activity): ActivityUi {
-  const startHour = activity.start.getHours();
-  const startMinute = activity.start.getMinutes();
-  const endHour = activity.end.getHours();
-  const endMinute = activity.end.getMinutes();
+  const startHour = new Date(activity.start).getHours();
+  const startMinute = new Date(activity.start).getMinutes();
+  const endHour = new Date(activity.end).getHours();
+  const endMinute = new Date(activity.end).getMinutes();
 
   const startMin = startHour * 60 + startMinute;
   const endMin = endHour * 60 + endMinute;
 
-  const startRow = startMin / 5;
-  const duration = (endMin - startMin) / 5;
+  const startRow = Math.round(startMin / 5);
+  const duration = Math.round((endMin - startMin) / 5);
 
   return {
     ...activity,
