@@ -36,13 +36,15 @@ const props = withDefaults(defineProps<Props>(), {
 interface DayViewTimeBlock extends TimeBlock {
   row: number;
   span: number;
+  startTimeLabel: string;
 }
 
 const container = ref(null);
 const containerNav = ref(null);
 const containerOffset = ref(null);
 
-const rows = 288; // break 24 hour day into 288 5 minute segments
+const startGridOffsetRows = 3;
+const rows = 288 + startGridOffsetRows; // break 24 hour day into 288 5 minute segments
 
 function timeBlockToDayViewTimeBlock(timeBlock: TimeBlock): DayViewTimeBlock {
   const startHour = new Date(timeBlock.start).getHours();
@@ -58,8 +60,12 @@ function timeBlockToDayViewTimeBlock(timeBlock: TimeBlock): DayViewTimeBlock {
 
   return {
     ...timeBlock,
-    row: startRow + 2,
+    row: startRow + startGridOffsetRows,
     span: duration,
+    startTimeLabel: new Date(timeBlock.start).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
   };
 }
 
@@ -155,7 +161,7 @@ onMounted(() => {
             v-for="timeBlock in dayViewTimeBlocks"
             :key="timeBlock.name"
             class="relative mt-px flex"
-            :style="`grid-row: ${timeBlock.row} / span ${timeBlock.span}`"
+            :style="`grid-row: ${timeBlock.row} / span ${timeBlock.span}; grid-column: 1;`"
           >
             <a
               href="#"
@@ -165,7 +171,9 @@ onMounted(() => {
                 {{ timeBlock.name }}
               </p>
               <p class="text-blue-500 group-hover:text-blue-700">
-                <time datetime="2022-01-22T06:00">6:00 AM</time>
+                <time datetime="2022-01-22T06:00">{{
+                  timeBlock.startTimeLabel
+                }}</time>
               </p>
             </a>
           </li>

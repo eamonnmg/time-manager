@@ -4,8 +4,9 @@ import AppHeader from "@/components/AppHeader.vue";
 import DayView from "@/components/DayView/DayView.vue";
 import TimeBlockActivityModal from "@/components/TimeBlockActivityModal.vue";
 import type { TimeBlock } from "@/types";
+import { timeBlocks } from "@/utils/testdata";
 
-const timeblocks = ref<TimeBlock>([]);
+const timeblocks = ref<TimeBlock>(timeBlocks);
 const showTimeBlockActivityModal = ref(false);
 
 function addTimeBlock(timeblock: TimeBlock) {
