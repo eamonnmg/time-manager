@@ -1,12 +1,4 @@
-<script setup lang="ts">
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  EllipsisHorizontalIcon,
-} from "@heroicons/vue/20/solid";
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <header
