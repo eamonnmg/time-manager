@@ -5,13 +5,7 @@
     class="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4"
   >
     <div>
-      <h1 class="text-base font-semibold leading-6 text-gray-900">
-        <time datetime="2022-01-22" class="sm:hidden">Jan 22, 2022</time>
-        <time datetime="2022-01-22" class="hidden sm:inline"
-          >January 22, 2022
-        </time>
-      </h1>
-      <p class="mt-1 text-sm text-gray-500">Saturday</p>
+      <slot name="left"></slot>
     </div>
     <div class="flex items-center">
       <slot> </slot>

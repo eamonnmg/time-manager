@@ -7,7 +7,7 @@ import type { TimeBlock } from "@/types";
 import { timeBlocks } from "@/utils/testdata";
 import { format } from "date-fns";
 
-const timeblocks = ref<TimeBlock>(timeBlocks);
+const timeblocks = ref<TimeBlock[]>(timeBlocks);
 const showTimeBlockActivityModal = ref(false);
 
 function addTimeBlock(timeblock: TimeBlock) {
