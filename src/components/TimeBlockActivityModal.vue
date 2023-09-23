@@ -8,14 +8,14 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { ClockIcon } from "@heroicons/vue/24/outline";
-import type { Activity } from "@/components/DayView.vue";
+import type { TimeBlock } from "@/types";
 
 interface Props {
   open: boolean;
 }
 defineProps<Props>();
 const emit = defineEmits(["update:open", "addTimeBlock"]);
-const activityTimeBlock = ref<Activity>({
+const activityTimeBlock = ref<TimeBlock>({
   name: "",
   start: new Date().toLocaleDateString(),
   end: new Date(Date.now() + 1000 * 60 * 60).toLocaleDateString(), // 1 hour from now
@@ -54,7 +54,7 @@ function submit() {
 
       <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div
-          class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
+          class="flex min-h-full justify-center p-4 text-center items-center sm:p-0"
         >
           <TransitionChild
             as="template"

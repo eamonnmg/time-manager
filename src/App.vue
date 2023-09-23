@@ -3,7 +3,7 @@ import DayView from "@/components/CalenderView.vue";
 </script>
 
 <template>
-  <div>
+  <div class="h-screen">
     <DayView />
   </div>
 </template>
