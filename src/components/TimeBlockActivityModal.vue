@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   Dialog,
   DialogPanel,
@@ -9,19 +9,26 @@ import {
 } from "@headlessui/vue";
 import { ClockIcon } from "@heroicons/vue/24/outline";
 import type { TimeBlock } from "@/types";
+import { add } from "date-fns";
 
 interface Props {
   open: boolean;
 }
 defineProps<Props>();
 const emit = defineEmits(["update:open", "addTimeBlock"]);
-const activityTimeBlock = ref<TimeBlock>({
-  name: "",
-  start: new Date().toLocaleDateString(),
-  end: new Date(Date.now() + 1000 * 60 * 60).toLocaleDateString(), // 1 hour from now
-  color: "bg-blue-500",
-});
 
+const name = ref("");
+const start = ref(new Date().toISOString().slice(0, 19));
+const duration = ref(30);
+
+const activityTimeBlock = computed<TimeBlock>(() => {
+  return {
+    name: name.value,
+    start: start.value,
+    end: add(new Date(start.value), { minutes: duration.value }),
+    color: "bg-green-50",
+  };
+});
 function close() {
   emit("update:open", false);
 }
@@ -100,7 +107,7 @@ function submit() {
                     <div class="mt-2">
                       <input
                         id="name"
-                        v-model="activityTimeBlock.name"
+                        v-model="name"
                         type="text"
                         name="activity name"
                         class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -121,7 +128,7 @@ function submit() {
                     <div class="mt-2">
                       <input
                         id="start-time"
-                        v-model="activityTimeBlock.start"
+                        v-model="start"
                         type="datetime-local"
                         name="start-time"
                         class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -129,22 +136,25 @@ function submit() {
                         aria-describedby="start-time-description"
                       />
                     </div>
-                    <p id="name-description" class="mt-2 text-sm text-gray-500">
-                      The end time of time block.
-                    </p>
+
                     <div class="mt-2">
+                      <label
+                        for="duration"
+                        class="block text-sm font-medium leading-6 text-gray-900"
+                        >Duration</label
+                      >
                       <input
-                        id="end-time"
-                        v-model="activityTimeBlock.end"
-                        type="datetime-local"
-                        name="end-time"
+                        id="duration"
+                        v-model="duration"
+                        type="number"
+                        name="duration"
                         class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        placeholder=""
+                        placeholder="Enter duration in minutes"
                         aria-describedby="end-time-description"
                       />
                     </div>
                     <p id="name-description" class="mt-2 text-sm text-gray-500">
-                      The start time of time block.
+                      The duration of the time block.
                     </p>
                   </div>
                 </div>
