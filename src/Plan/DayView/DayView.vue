@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import type { TimeBlock } from "@/types";
-import HourDividerLines from "@/components/DayView/HourDividerLines.vue";
+import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import { scaleTime } from "d3";
 import { endOfToday, startOfToday } from "date-fns";
 import { useElementSize } from "@vueuse/core";

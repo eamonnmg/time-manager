@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import DayView from "@/components/CalenderView.vue";
+import SidebarLayout from "@/components/SidebarLayout.vue";
 </script>
 
 <template>
-  <div class="h-screen">
-    <DayView />
-  </div>
+  <SidebarLayout>
+    <router-view />
+  </SidebarLayout>
 </template>

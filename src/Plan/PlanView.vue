@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import AppHeader from "@/components/AppHeader.vue";
-import DayView from "@/components/DayView/DayView.vue";
-import TimeBlockActivityModal from "@/components/TimeBlockActivityModal.vue";
+import AppHeader from "@/Plan/AppHeader.vue";
+import DayView from "@/Plan/DayView/DayView.vue";
+import TimeBlockActivityModal from "@/Plan/TimeBlockActivityModal.vue";
 import type { TimeBlock } from "@/types";
 import { timeBlocks } from "@/utils/testdata";
 import { format } from "date-fns";
@@ -21,7 +21,7 @@ function addTimeBlock(timeblock: TimeBlock) {
     v-model:open="showTimeBlockActivityModal"
     @add-time-block="addTimeBlock"
   />
-  <div class="flex h-full flex-col">
+  <div class="flex h-full w-full flex-col">
     <AppHeader>
       <template #left>
         <h1 class="text-base font-semibold leading-6 text-gray-900">
