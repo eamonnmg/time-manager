@@ -29,26 +29,36 @@ const crimeAndPunishment = {
   color: "bg-red-300",
   nestedActivities: [nonFiction, philosohy],
 };
-export const useActivitiesStore = defineStore("activities", () => {
-  const activities = ref<Activity[]>([reading, nonFiction, crimeAndPunishment]);
-  function add(activity: Activity) {
-    const activityId = self.crypto.randomUUID();
-    activities.value.push({
-      ...activity,
-      id: activityId,
-    });
-  }
-
-  function edit(activity: Activity) {
-    const targetActivityIdx = activities.value.findIndex(
-      (a: Activity) => a.id === activity.id,
-    );
-    if (!targetActivityIdx) {
-      console.error("activity not found");
-      return;
+export const useActivitiesStore = defineStore(
+  "activities",
+  () => {
+    const activities = ref<Activity[]>([
+      reading,
+      nonFiction,
+      crimeAndPunishment,
+    ]);
+    function add(activity: Activity) {
+      const activityId = self.crypto.randomUUID();
+      activities.value.push({
+        ...activity,
+        id: activityId,
+      });
     }
-    activities.value[targetActivityIdx] = activity;
-  }
 
-  return { activities, add, edit };
-});
+    function edit(activity: Activity) {
+      const targetActivityIdx = activities.value.findIndex(
+        (a: Activity) => a.id === activity.id,
+      );
+      if (!targetActivityIdx) {
+        console.error("activity not found");
+        return;
+      }
+      activities.value[targetActivityIdx] = activity;
+    }
+
+    return { activities, add, edit };
+  },
+  {
+    persist: true,
+  },
+);

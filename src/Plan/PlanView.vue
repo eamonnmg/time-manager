@@ -7,13 +7,10 @@ import type { TimeBlock } from "@/types";
 import { timeBlocks } from "@/utils/testdata";
 import { format } from "date-fns";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
+import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 
-const timeblocks = ref<TimeBlock[]>(timeBlocks);
+const timeBlockStore = useTimeBlockStore();
 const showTimeBlockActivityModal = ref(false);
-
-function addTimeBlock(timeblock: TimeBlock) {
-  timeblocks.value.push(timeblock);
-}
 
 const activityStore = useActivitiesStore();
 </script>
@@ -23,7 +20,7 @@ const activityStore = useActivitiesStore();
     v-if="showTimeBlockActivityModal"
     v-model:open="showTimeBlockActivityModal"
     :activities="activityStore.activities"
-    @add-time-block="addTimeBlock"
+    @add-time-block="timeBlockStore.add"
   />
   <div class="flex h-full w-full flex-col">
     <AppHeader>
@@ -49,7 +46,7 @@ const activityStore = useActivitiesStore();
       </button>
     </AppHeader>
     <div class="isolate flex flex-auto overflow-hidden bg-white">
-      <DayView :time-blocks="timeblocks" />
+      <DayView :time-blocks="timeBlockStore.timeBlocks" />
     </div>
   </div>
 </template>
