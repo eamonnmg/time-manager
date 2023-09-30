@@ -9,10 +9,20 @@ import {
   ComboboxLabel,
 } from "@headlessui/vue";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
+import type { Activity } from "@/types";
 
-const props = defineProps({
-  modelValue: Object,
-  activities: Array,
+interface Props {
+  modelValue: Activity[] | Activity;
+  activities: Activity[];
+  label: string;
+  multiple?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: () => [],
+  activities: () => [],
+  label: "Activities",
+  multiple: true,
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -27,9 +37,13 @@ const filteredActivities = computed(() =>
 );
 
 const displayValueFn = () => {
-  return props.modelValue.reduce((acc, activity) => {
-    return acc + activity.name + ", ";
-  }, "");
+  if (props.modelValue.length) {
+    return props.modelValue.reduce((acc, activity) => {
+      return acc + activity.name + ", ";
+    }, "");
+  }
+
+  return props.modelValue.name;
 };
 </script>
 
@@ -38,11 +52,12 @@ const displayValueFn = () => {
     :model-value="modelValue"
     as="div"
     by="id"
+    :multiple="multiple"
     @update:modelValue="(value) => emit('update:modelValue', value)"
   >
-    <ComboboxLabel class="block text-sm font-medium leading-6 text-gray-900"
-      >Nested Activities</ComboboxLabel
-    >
+    <ComboboxLabel class="block text-sm font-medium leading-6 text-gray-900">{{
+      label
+    }}</ComboboxLabel>
     <div class="relative mt-2">
       <ComboboxInput
         :display-value="displayValueFn"

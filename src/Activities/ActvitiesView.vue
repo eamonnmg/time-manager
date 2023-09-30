@@ -4,7 +4,7 @@ import AddActivityModal from "@/Activities/AddActivityModal.vue";
 import { ref } from "vue";
 
 const { activities, add } = useActivitiesStore();
-const showAddActivityModal = ref(true);
+const showAddActivityModal = ref(false);
 </script>
 
 <template>

@@ -6,6 +6,7 @@ import TimeBlockActivityModal from "@/Plan/TimeBlockActivityModal.vue";
 import type { TimeBlock } from "@/types";
 import { timeBlocks } from "@/utils/testdata";
 import { format } from "date-fns";
+import { useActivitiesStore } from "@/Activities/activitiesStore";
 
 const timeblocks = ref<TimeBlock[]>(timeBlocks);
 const showTimeBlockActivityModal = ref(false);
@@ -13,12 +14,15 @@ const showTimeBlockActivityModal = ref(false);
 function addTimeBlock(timeblock: TimeBlock) {
   timeblocks.value.push(timeblock);
 }
+
+const activityStore = useActivitiesStore();
 </script>
 
 <template>
   <TimeBlockActivityModal
     v-if="showTimeBlockActivityModal"
     v-model:open="showTimeBlockActivityModal"
+    :activities="activityStore.activities"
     @add-time-block="addTimeBlock"
   />
   <div class="flex h-full w-full flex-col">

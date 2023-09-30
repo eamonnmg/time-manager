@@ -4,41 +4,22 @@ import type { TimeBlock } from "@/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import { scaleTime } from "d3";
 import { endOfToday, startOfToday } from "date-fns";
-import { useElementSize } from "@vueuse/core";
+// import { useElementSize } from "@vueuse/core";
 
 interface Props {
   timeBlocks: TimeBlock[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  timeBlocks: () => [
-    // {
-    //   name: "Breakfast",
-    //   start: new Date(2022, 0, 22, 6).toDateString(),
-    //   end: new Date(2022, 0, 22, 7),
-    //   color: "bg-blue-50",
-    // },
-    // {
-    //   name: "Flight to Paris",
-    //   start: new Date(2022, 0, 22, 7, 30),
-    //   end: new Date(2022, 0, 22, 8, 20),
-    //   color: "bg-pink-50",
-    // },
-    // {
-    //   name: "Sightseeing",
-    //   start: new Date(2022, 0, 22, 11),
-    //   end: new Date(2022, 0, 22, 15),
-    //   color: "bg-indigo-50",
-    // },
-  ],
+  timeBlocks: () => [],
 });
 
 /**
  * The data structure for an activity in the day view.
  */
 interface DayViewTimeBlock extends TimeBlock {
-  row: number;
-  span: number;
+  y: number;
+  height: number;
   startTimeLabel: string;
 }
 
@@ -48,7 +29,7 @@ const containerOffset = ref(null);
 const nowLine = ref(null);
 
 const startGridOffsetRows = 3;
-const rows = 288 + startGridOffsetRows; // break 24 hour day into 288 5 minute segments
+// const rows = 288 + startGridOffsetRows; // break 24 hour day into 288 5 minute segments
 
 // function timeBlockToDayViewTimeBlock(timeBlock: TimeBlock): DayViewTimeBlock {
 //   const startHour = new Date(timeBlock.start).getHours();
@@ -203,7 +184,7 @@ const timeScale = computed(() => {
         <ol class="relative w-full">
           <li
             v-for="timeBlock in dayViewTimeBlocks"
-            :key="timeBlock.name"
+            :key="timeBlock.activity.name"
             class="absolute left-0 w-full right-0 top-0 bottom-0 mt-px flex"
             :style="{
               height: `${timeBlock.height}px`,
@@ -212,10 +193,10 @@ const timeScale = computed(() => {
           >
             <a
               href="#"
-              :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg ${timeBlock.color} p-2 text-xs leading-5`"
+              :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg ${timeBlock.activity.color} p-2 text-xs leading-5`"
             >
               <p class="order-1 font-semibold text-blue-700">
-                {{ timeBlock.name }}
+                {{ timeBlock.activity.name }}
               </p>
               <p class="text-blue-500 group-hover:text-blue-700">
                 <time datetime="2022-01-22T06:00">{{

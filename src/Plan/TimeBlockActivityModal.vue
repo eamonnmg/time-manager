@@ -8,22 +8,24 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { ClockIcon } from "@heroicons/vue/24/outline";
-import type { TimeBlock } from "@/types";
+import type { Activity, TimeBlock } from "@/types";
 import { add } from "date-fns";
+import ActivityPicker from "@/Activities/ActivityPicker.vue";
 
 interface Props {
   open: boolean;
+  activities: Activity[];
 }
 defineProps<Props>();
 const emit = defineEmits(["update:open", "addTimeBlock"]);
 
-const name = ref("");
+const activity = ref<Activity>(undefined);
 const start = ref(new Date().toISOString().slice(0, 19));
 const duration = ref(30);
 
 const activityTimeBlock = computed<TimeBlock>(() => {
   return {
-    name: name.value,
+    activity: activity.value,
     start: start.value,
     end: add(new Date(start.value), { minutes: duration.value }),
     color: "bg-green-50",
@@ -105,14 +107,10 @@ function submit() {
                       >Name</label
                     >
                     <div class="mt-2">
-                      <input
-                        id="name"
-                        v-model="name"
-                        type="text"
-                        name="activity name"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        placeholder="Read Pride and prejudice"
-                        aria-describedby="name-description"
+                      <activity-picker
+                        v-model="activity"
+                        :multiple="false"
+                        :activities="activities"
                       />
                     </div>
                     <p id="name-description" class="mt-2 text-sm text-gray-500">

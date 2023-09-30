@@ -1,5 +1,5 @@
 export interface TimeBlock {
-  name: string;
+  activity: Activity;
   start: string;
   end: string;
   color: string;

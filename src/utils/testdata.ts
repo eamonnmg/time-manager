@@ -13,7 +13,12 @@ function createTimeBlockOnToday(
 ): TimeBlock {
   const start = add(startOfToday(), startHourMin);
   return {
-    name,
+    activity: {
+      id: self.crypto.randomUUID(),
+      color: "bg-yellow-200",
+      name,
+      nestedActivities: [],
+    },
     start,
     end: add(start, { minutes: durationMin }),
     color: "bg-blue-200 opacity-80",
