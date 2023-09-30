@@ -9,3 +9,10 @@ export interface Day {
   date: string;
   isCurrentMonth?: boolean;
 }
+
+export interface Activity {
+  id: string | number;
+  name: string;
+  color: string;
+  nestedActivities: Activity[];
+}

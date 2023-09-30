@@ -1,43 +1,14 @@
 <script setup lang="ts">
-interface Activity {
-  id: string | number;
-  name: string;
-  color: string;
-  nestedActivities: Activity[];
-}
+import { useActivitiesStore } from "@/Activities/activitiesStore";
+import AddActivityModal from "@/Activities/AddActivityModal.vue";
+import { ref } from "vue";
 
-const reading = {
-  id: self.crypto.randomUUID(),
-  name: "Reading",
-  color: "bg-blue-300",
-  nestedActivities: [],
-};
-
-const philosohy = {
-  id: self.crypto.randomUUID(),
-  name: "philosohy",
-  color: "bg-grey-300",
-  nestedActivities: [],
-};
-
-const nonFiction = {
-  id: self.crypto.randomUUID(),
-  name: "Non-fiction",
-  color: "bg-green-300",
-  nestedActivities: [reading],
-};
-
-const crimeAndPunishment = {
-  id: self.crypto.randomUUID(),
-  name: "Crime and Punishment",
-  color: "bg-red-300",
-  nestedActivities: [nonFiction, philosohy],
-};
-
-const activities: Activity[] = [reading, nonFiction, crimeAndPunishment];
+const { activities } = useActivitiesStore();
+const showAddActivityModal = ref(true);
 </script>
 
 <template>
+  <AddActivityModal v-model:open="showAddActivityModal" />
   <div class="px-4 sm:px-6 lg:px-8">
     <div class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
@@ -53,8 +24,9 @@ const activities: Activity[] = [reading, nonFiction, crimeAndPunishment];
         <button
           type="button"
           class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          @click="showAddActivityModal = true"
         >
-          Add user
+          Add activity
         </button>
       </div>
     </div>
