@@ -32,7 +32,11 @@ const crimeAndPunishment = {
 export const useActivitiesStore = defineStore("activities", () => {
   const activities = ref<Activity[]>([reading, nonFiction, crimeAndPunishment]);
   function add(activity: Activity) {
-    activities.value.push(activity);
+    const activityId = self.crypto.randomUUID();
+    activities.value.push({
+      ...activity,
+      id: activityId,
+    });
   }
 
   return { activities, add };

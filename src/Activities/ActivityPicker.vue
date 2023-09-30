@@ -8,7 +8,6 @@ import {
   ComboboxButton,
   ComboboxLabel,
 } from "@headlessui/vue";
-import { Float } from "@headlessui-float/vue";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
 
 const props = defineProps({

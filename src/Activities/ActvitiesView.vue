@@ -3,12 +3,12 @@ import { useActivitiesStore } from "@/Activities/activitiesStore";
 import AddActivityModal from "@/Activities/AddActivityModal.vue";
 import { ref } from "vue";
 
-const { activities } = useActivitiesStore();
+const { activities, add } = useActivitiesStore();
 const showAddActivityModal = ref(true);
 </script>
 
 <template>
-  <AddActivityModal v-model:open="showAddActivityModal" />
+  <AddActivityModal v-model:open="showAddActivityModal" @add-activity="add" />
   <div class="px-4 sm:px-6 lg:px-8">
     <div class="sm:flex sm:items-center">
       <div class="sm:flex-auto">

@@ -18,7 +18,7 @@ interface Props {
 defineProps<Props>();
 const emit = defineEmits(["update:open", "addActivity"]);
 //
-// const name = ref("");
+const name = ref("");
 const color = ref("bg-green-300");
 
 const activityQuery = ref("");
@@ -26,61 +26,29 @@ const activitiesStore = useActivitiesStore();
 
 const { activities } = storeToRefs(activitiesStore);
 
-const selectedNestedActivities = ref<Activity[]>([]);
-const filteredActivities = computed<Activity[]>(() => {
-  return activityQuery.value === ""
-    ? activities.value
-    : activities.value.filter((person) => {
-        return person.name
-          .toLowerCase()
-          .includes(activityQuery.value.toLowerCase());
-      });
-});
-
-const people = [
-  {
-    id: 1,
-    name: "Leslie Alexander",
-    imageUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  },
-  // More users...
-];
-
-const query = ref("");
-const selectedPerson = ref(null);
-const filteredPeople = computed(() =>
-  query.value === ""
-    ? people
-    : people.filter((person) => {
-        return person.name.toLowerCase().includes(query.value.toLowerCase());
-      }),
-);
-
-//
-// const activityTimeBlock = computed<TimeBlock>(() => {
-//   return {
-//     name: name.value,
-//     start: start.value,
-//     end: add(new Date(start.value), { minutes: duration.value }),
-//     color: "bg-green-50",
-//   };
-// });
 function close() {
   emit("update:open", false);
 }
-
 const selectedActivities = ref([]);
 
+const newActivity = computed<Activity>(() => {
+  return {
+    id: "",
+    name: name.value,
+    color: color.value,
+    nestedActivities: [...selectedActivities.value],
+  };
+});
+
 //
-// function addTimeBlock() {
-//   emit("addTimeBlock", activityTimeBlock.value);
-// }
+function addActvity() {
+  emit("addActivity", newActivity.value);
+}
 //
-// function submit() {
-//   addTimeBlock();
-//   close();
-// }
+function submit() {
+  addActvity();
+  close();
+}
 </script>
 <template>
   <TransitionRoot as="template" :show="open">
@@ -143,15 +111,15 @@ const selectedActivities = ref([]);
                       >Name</label
                     >
                     <div class="mt-2">
-                      <!--                      <input-->
-                      <!--                        id="name"-->
-                      <!--                        v-model="name"-->
-                      <!--                        type="text"-->
-                      <!--                        name="activity name"-->
-                      <!--                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"-->
-                      <!--                        placeholder="Read Pride and prejudice"-->
-                      <!--                        aria-describedby="name-description"-->
-                      <!--                      />-->
+                      <input
+                        id="name"
+                        v-model="name"
+                        type="text"
+                        name="activity name"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder="Read Pride and prejudice"
+                        aria-describedby="name-description"
+                      />
                     </div>
                     <p id="name-description" class="mt-2 text-sm text-gray-500">
                       The name of the activity.
@@ -187,8 +155,9 @@ const selectedActivities = ref([]);
                 <button
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  @click="submit"
                 >
-                  Add time block
+                  Add activity
                 </button>
               </div>
             </DialogPanel>
