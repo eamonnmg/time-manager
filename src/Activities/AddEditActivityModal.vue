@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, toRaw, watch } from "vue";
 import {
   Dialog,
   DialogPanel,
@@ -11,42 +11,76 @@ import type { Activity } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { storeToRefs } from "pinia";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";
+import { local } from "d3";
 
 interface Props {
   open: boolean;
+  activity?: Activity;
 }
-defineProps<Props>();
-const emit = defineEmits(["update:open", "addActivity"]);
-//
-const name = ref("");
-const color = ref("bg-green-300");
+const props = defineProps<Props>();
+const emit = defineEmits([
+  "update:open",
+  "addActivity",
+  "editActivity",
+  "close",
+]);
 
-const activityQuery = ref("");
 const activitiesStore = useActivitiesStore();
 
 const { activities } = storeToRefs(activitiesStore);
 
+const editMode = computed(() => {
+  return !!props.activity;
+});
+
+const localActivityObject = ref<Activity>({
+  id: "",
+  name: "",
+  color: "",
+  nestedActivities: [],
+});
+
+watch(editMode, (val) => {
+  if (val) {
+    localActivityObject.value = JSON.parse(JSON.stringify(props.activity));
+  }
+});
+
+const name = ref("");
+const color = ref("bg-green-300");
+
 function close() {
   emit("update:open", false);
+  emit("close");
 }
-const selectedActivities = ref([]);
+// const selectedActivities = ref([]);
 
-const newActivity = computed<Activity>(() => {
-  return {
-    id: "",
-    name: name.value,
-    color: color.value,
-    nestedActivities: [...selectedActivities.value],
-  };
-});
+// const newActivity = computed<Activity>(() => {
+//   return {
+//     id: "",
+//     name: name.value,
+//     color: color.value,
+//     nestedActivities: [...selectedActivities.value],
+//   };
+// });
 
 //
 function addActvity() {
-  emit("addActivity", newActivity.value);
+  emit("addActivity", localActivityObject.value);
 }
+
+function editActivity() {
+  emit("editActivity", localActivityObject.value);
+}
+
 //
 function submit() {
-  addActvity();
+  console.log("submitting", localActivityObject.value);
+  if (editMode.value) {
+    editActivity();
+  } else {
+    addActvity();
+  }
   close();
 }
 </script>
@@ -113,7 +147,7 @@ function submit() {
                     <div class="mt-2">
                       <input
                         id="name"
-                        v-model="name"
+                        v-model="localActivityObject.name"
                         type="text"
                         name="activity name"
                         class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -134,7 +168,7 @@ function submit() {
                     <div class="mt-2">
                       <input
                         id="color"
-                        v-model="color"
+                        v-model="localActivityObject.color"
                         type="text"
                         name="color"
                         class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -144,7 +178,7 @@ function submit() {
                     </div>
 
                     <ActivityPicker
-                      v-model="selectedActivities"
+                      v-model="localActivityObject.nestedActivities"
                       :activities="activities"
                       multiple
                     />

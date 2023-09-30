@@ -2,7 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import type { TimeBlock } from "@/types";
 
-export const useActivitiesStore = defineStore("activities", () => {
+export const useTimeBlockStore = defineStore("timeBlocks", () => {
   const timeBlocks = ref<TimeBlock[]>([]);
   function add(timeBlock: TimeBlock) {
     const timeBlockId = self.crypto.randomUUID();
@@ -14,7 +14,7 @@ export const useActivitiesStore = defineStore("activities", () => {
 
   function edit(timeBlock: TimeBlock) {
     const targetTimeBlockIdx = timeBlocks.value.findIndex(
-      (tb) => tb.id === timeBlock.id,
+      (tb: TimeBlock) => tb.id === timeBlock.id,
     );
     if (!targetTimeBlockIdx) {
       console.error("timeBlock not found");

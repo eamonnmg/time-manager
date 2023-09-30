@@ -1,14 +1,30 @@
 <script setup lang="ts">
 import { useActivitiesStore } from "@/Activities/activitiesStore";
-import AddActivityModal from "@/Activities/AddActivityModal.vue";
-import { ref } from "vue";
+import AddActivityModal from "@/Activities/AddEditActivityModal.vue";
+import { nextTick, ref } from "vue";
+import type { Activity } from "@/types";
 
-const { activities, add } = useActivitiesStore();
+const { activities, add, edit } = useActivitiesStore();
 const showAddActivityModal = ref(false);
+
+const selectedActivity = ref(undefined);
+
+function editActivity(activity: Activity) {
+  selectedActivity.value = activity;
+  nextTick(() => {
+    showAddActivityModal.value = true;
+  });
+}
 </script>
 
 <template>
-  <AddActivityModal v-model:open="showAddActivityModal" @add-activity="add" />
+  <AddActivityModal
+    v-model:open="showAddActivityModal"
+    :activity="selectedActivity"
+    @add-activity="add"
+    @edit-activity="edit"
+    @close="selectedActivity = undefined"
+  />
   <div class="px-4 sm:px-6 lg:px-8">
     <div class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
@@ -16,8 +32,7 @@ const showAddActivityModal = ref(false);
           Activities
         </h1>
         <p class="mt-2 text-sm text-gray-700">
-          A list of all the users in your account including their name, title,
-          email and role.
+          A list of all the activities you can timeblock.
         </p>
       </div>
       <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
@@ -81,9 +96,12 @@ const showAddActivityModal = ref(false);
                 <td
                   class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                 >
-                  <a href="#" class="text-indigo-600 hover:text-indigo-900"
-                    >Edit<span class="sr-only">, {{ activity.name }}</span></a
+                  <button
+                    class="btn btn-sm btn-ghost text-indigo-600 hover:text-indigo-900"
+                    @click="editActivity(activity)"
                   >
+                    Edit<span class="sr-only">, {{ activity.name }}</span>
+                  </button>
                 </td>
               </tr>
             </tbody>

@@ -39,5 +39,16 @@ export const useActivitiesStore = defineStore("activities", () => {
     });
   }
 
-  return { activities, add };
+  function edit(activity: Activity) {
+    const targetActivityIdx = activities.value.findIndex(
+      (a: Activity) => a.id === activity.id,
+    );
+    if (!targetActivityIdx) {
+      console.error("activity not found");
+      return;
+    }
+    activities.value[targetActivityIdx] = activity;
+  }
+
+  return { activities, add, edit };
 });
