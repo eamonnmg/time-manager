@@ -3,13 +3,13 @@ import { defineStore } from "pinia";
 import type { Budget } from "@/types";
 
 const dayBudget: Budget = {
-  id: self.crypto.randomUUID(),
+  id: "1",
   name: "Day",
   duration: 1000 * 60 * 60 * 24,
 };
 
 const weekBudget: Budget = {
-  id: self.crypto.randomUUID(),
+  id: "2",
   name: "Week",
   duration: 1000 * 60 * 60 * 24 * 7,
 };
@@ -18,6 +18,11 @@ export const useBudgetStore = defineStore(
   "budgets",
   () => {
     const budgets = ref<Budget[]>([dayBudget, weekBudget]);
+
+    function getById(id: string): Budget | undefined {
+      return budgets.value.find((b: Budget) => b.id === id);
+    }
+
     function add(budget: Budget) {
       const timeBlockId = self.crypto.randomUUID();
       budgets.value.push({
@@ -37,7 +42,7 @@ export const useBudgetStore = defineStore(
       budget.value[targetIdx] = budget;
     }
 
-    return { budgets, add, edit };
+    return { budgets, getById, add, edit };
   },
   {
     persist: true,

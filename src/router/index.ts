@@ -18,12 +18,21 @@ const router = createRouter({
       component: () => import("@/Activities/ActvitiesView.vue"),
     },
     {
-      path: "/budget",
-      name: "budget",
+      path: "/budgets",
+      name: "budgetIndex",
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import("@/Budget/BudgetIndexView.vue"),
+      children: [],
+    },
+    {
+      path: "/budgets/:budgetId",
+      name: "budget",
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import("@/Budget/BudgetView.vue"),
     },
   ],
 });

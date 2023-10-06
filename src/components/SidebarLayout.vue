@@ -12,7 +12,7 @@ const navigation = [
     icon: WrenchScrewdriverIcon,
     current: false,
   },
-  { name: "Budget", href: "/budget", icon: ChartPieIcon, current: false },
+  { name: "Budget", href: "/budgets", icon: ChartPieIcon, current: false },
 ];
 </script>
 
@@ -36,7 +36,7 @@ const navigation = [
                     <component
                       :is="item.icon"
                       :class="[
-                        item.current
+                        isActive
                           ? 'text-indigo-600'
                           : 'text-gray-400 group-hover:text-indigo-600',
                         'h-6 w-6 shrink-0',

@@ -55,11 +55,15 @@ const budgetStore = useBudgetStore();
                 <td
                   class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
                 >
-                  <button
+                  <RouterLink
+                    :to="{
+                      name: 'budget',
+                      params: { budgetId: budget.id },
+                    }"
                     class="btn btn-sm btn-ghost text-indigo-600 hover:text-indigo-900"
                   >
                     Edit<span class="sr-only">, {{ budget.name }}</span>
-                  </button>
+                  </RouterLink>
                 </td>
               </tr>
             </tbody>

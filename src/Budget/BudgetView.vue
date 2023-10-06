@@ -1,69 +1,87 @@
 <script setup lang="ts">
 import AppHeader from "@/Plan/AppHeader.vue";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
-import { millisecondsToHours } from "date-fns";
+import { useRoute } from "vue-router";
+import ActivityPicker from "@/Activities/ActivityPicker.vue";
+import { useActivitiesStore } from "@/Activities/activitiesStore";
+import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
+import { computed } from "vue";
+
+const budgetId = useRoute().params.budgetId;
+
+console.log(budgetId);
 
 const budgetStore = useBudgetStore();
+const activityStore = useActivitiesStore();
+const budgetActivityStore = useBudgetActivityStore();
+
+const budget = budgetStore.getById(budgetId.toString());
+
+const budgetActivities = computed(() => {
+  return budgetActivityStore.getAllForBudget(budgetId.toString());
+});
+
+function onActivitySelected(e) {
+  budgetActivityStore.add(budgetId.toString(), e[0].id);
+  console.log("activity selected", e);
+}
 </script>
 
 <template>
   <div class="flex h-full w-full flex-col">
     <AppHeader>
       <template #left>
-        <h1 class="text-base font-semibold leading-6 text-gray-900">Budget</h1>
+        <h1 class="text-base font-semibold leading-6 text-gray-900">
+          Edit Budget
+          <span class="badge badge-primary">{{
+            budgetStore.getById(budgetId.toString()).name
+          }}</span>
+        </h1>
         <p class="mt-2 text-sm text-gray-700">
           A budget defines how you want to allocate your time for a period
         </p>
       </template>
-      <button
-        type="button"
-        class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-      >
-        Add budget
-      </button>
     </AppHeader>
-    <div class="px-4 mt-8 flow-root">
-      <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <!--    // activies-->
+    <div class="px-4 h-full divide-x space-x-4 flex">
+      <div class="w-1/2 flex flex-col mt-6">
+        <table class="table">
+          <!-- head -->
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- row 1 -->
+            <tr v-for="activity in budgetActivities" :key="activity.id">
+              <td>{{ activity.activity.name }}</td>
+              <td>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  class="range"
+                  :value="activity.allocatedTime"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!--      config-->
+      <div class="w-1/2">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-          <table class="min-w-full divide-y divide-gray-300">
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                  class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                >
-                  Duration
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr v-for="budget in budgetStore.budgets" :key="budget.id">
-                <td
-                  class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
-                >
-                  {{ budget.name }}
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {{ millisecondsToHours(budget.duration) }} hours
-                </td>
-                <td
-                  class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
-                >
-                  <button
-                    class="btn btn-sm btn-ghost text-indigo-600 hover:text-indigo-900"
-                  >
-                    Edit<span class="sr-only">, {{ budget.name }}</span>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          Name: <input v-model="budget.name" type="text" />
+          <br />
+          Duration: <input v-model="budget.duration" type="text" />
+          <br />
+          Activities:
+          <ActivityPicker
+            :activities="activityStore.activities"
+            @update:model-value="onActivitySelected"
+          />
         </div>
       </div>
     </div>

@@ -37,6 +37,11 @@ export const useActivitiesStore = defineStore(
       nonFiction,
       crimeAndPunishment,
     ]);
+
+    function getById(id: string | number): Activity | undefined {
+      return activities.value.find((a: Activity) => a.id === id);
+    }
+
     function add(activity: Activity) {
       const activityId = self.crypto.randomUUID();
       activities.value.push({
@@ -56,7 +61,7 @@ export const useActivitiesStore = defineStore(
       activities.value[targetActivityIdx] = activity;
     }
 
-    return { activities, add, edit };
+    return { activities, getById, add, edit };
   },
   {
     persist: true,

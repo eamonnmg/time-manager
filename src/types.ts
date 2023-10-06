@@ -25,3 +25,17 @@ export interface Budget {
    */
   duration: number;
 }
+
+export interface BudgetActivity {
+  id: string | number;
+  budgetId: string | number;
+  activityId: string | number;
+  /**
+   * Allocated time in milliseconds
+   */
+  allocatedTime: number;
+}
+
+export interface BudgetActivityWithActivity extends BudgetActivity {
+  activity: Activity;
+}
