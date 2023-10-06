@@ -2,7 +2,9 @@
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import AddActivityModal from "@/Activities/AddEditActivityModal.vue";
 import { nextTick, ref } from "vue";
+import AppHeader from "@/Plan/AppHeader.vue";
 import type { Activity } from "@/types";
+import { format } from "date-fns";
 
 const { activities, add, edit } = useActivitiesStore();
 const showAddActivityModal = ref(false);
@@ -25,27 +27,26 @@ function editActivity(activity: Activity) {
     @edit-activity="edit"
     @close="selectedActivity = undefined"
   />
-  <div class="px-4 sm:px-6 lg:px-8">
-    <div class="sm:flex sm:items-center">
-      <div class="sm:flex-auto">
+
+  <div class="flex h-full w-full flex-col">
+    <AppHeader>
+      <template #left>
         <h1 class="text-base font-semibold leading-6 text-gray-900">
           Activities
         </h1>
         <p class="mt-2 text-sm text-gray-700">
           A list of all the activities you can timeblock.
         </p>
-      </div>
-      <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-        <button
-          type="button"
-          class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          @click="showAddActivityModal = true"
-        >
-          Add activity
-        </button>
-      </div>
-    </div>
-    <div class="mt-8 flow-root">
+      </template>
+      <button
+        type="button"
+        class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        @click="showAddActivityModal = true"
+      >
+        Add activity
+      </button>
+    </AppHeader>
+    <div class="px-4 mt-8 flow-root">
       <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           <table class="min-w-full divide-y divide-gray-300">

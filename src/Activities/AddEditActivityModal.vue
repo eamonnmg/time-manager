@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRaw, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   Dialog,
   DialogPanel,
@@ -11,7 +11,6 @@ import type { Activity } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { storeToRefs } from "pinia";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";
-import { local } from "d3";
 
 interface Props {
   open: boolean;
@@ -39,6 +38,23 @@ const localActivityObject = ref<Activity>({
   color: "",
   nestedActivities: [],
 });
+
+watch(
+  () => props.activity,
+  (val) => {
+    if (val) {
+      localActivityObject.value = JSON.parse(JSON.stringify(props.activity));
+    } else {
+      localActivityObject.value = {
+        id: "",
+        name: "",
+        color: "",
+        nestedActivities: [],
+      };
+    }
+  },
+  { deep: true },
+);
 
 watch(editMode, (val) => {
   if (val) {
@@ -191,7 +207,7 @@ function submit() {
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   @click="submit"
                 >
-                  Add activity
+                  {{ editMode ? "Edit activity" : "Add activity" }}
                 </button>
               </div>
             </DialogPanel>

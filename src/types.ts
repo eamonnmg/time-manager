@@ -16,3 +16,12 @@ export interface Activity {
   color: string;
   nestedActivities: Activity[];
 }
+
+export interface Budget {
+  id: string | number;
+  name: string;
+  /**
+   * Duration in milliseconds
+   */
+  duration: number;
+}
