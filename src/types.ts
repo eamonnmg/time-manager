@@ -17,8 +17,10 @@ export interface Activity {
   nestedActivities: Activity[];
 }
 
+export type BudgetId = string | number;
+
 export interface Budget {
-  id: string | number;
+  id: BudgetId;
   name: string;
   /**
    * Duration in milliseconds

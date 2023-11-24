@@ -7,6 +7,7 @@ import type {
   BudgetActivityWithActivity,
 } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
+import { useBudgetStore } from "@/Budget/useBudgetStore";
 
 // const dayBudget: Budget = {
 //   id: "1",
@@ -24,10 +25,22 @@ export const useBudgetActivityStore = defineStore(
   "budgetActivities",
   () => {
     const activityStore = useActivitiesStore();
+    const budgetStore = useBudgetStore();
     const budgetActivities = ref<BudgetActivity[]>([]);
 
     function getById(id: string): BudgetActivity | undefined {
       return budgetActivities.value.find((ba: BudgetActivity) => ba.id === id);
+    }
+
+    function setAllocatedTime(activityId: string, allocatedTime: number) {
+      const targetIdx = budgetActivities.value.findIndex(
+        (ba: BudgetActivity) => ba.activityId === activityId,
+      );
+      if (targetIdx === undefined) {
+        console.error("budget activity not found");
+        return;
+      }
+      budgetActivities.value[targetIdx].allocatedTime = allocatedTime;
     }
 
     function add(budgetId: string, activityId: string) {
@@ -49,7 +62,9 @@ export const useBudgetActivityStore = defineStore(
       });
     });
 
-    const getAllForBudget = computed<BudgetActivityWithActivity[]>(() => {
+    const getAllForBudget = computed<
+      (budgetId: string) => BudgetActivityWithActivity[]
+    >(() => {
       return (budgetId: string): BudgetActivityWithActivity[] => {
         return budgetActivitiesWithActivity.value.filter(
           (ba: BudgetActivity) => ba.budgetId === budgetId,
@@ -57,7 +72,37 @@ export const useBudgetActivityStore = defineStore(
       };
     });
 
-    return { budgetActivities, getAllForBudget, getById, add };
+    const totalAllocatedTimeForBudget = computed(() => {
+      return (budgetId: string): number => {
+        return getAllForBudget
+          .value(budgetId)
+          .reduce((acc: number, ba: BudgetActivityWithActivity) => {
+            console.log(ba);
+            return acc + ba.allocatedTime;
+          }, 0);
+      };
+    });
+
+    const remainingTimeForBudget = computed(() => {
+      return (budgetId: string): number => {
+        const budget = budgetStore.getById(budgetId);
+        if (!budget) {
+          console.error("budget not found");
+          return 0;
+        }
+        return budget.duration - totalAllocatedTimeForBudget.value(budgetId);
+      };
+    });
+
+    return {
+      budgetActivities,
+      getAllForBudget,
+      totalAllocatedTimeForBudget,
+      remainingTimeForBudget,
+      setAllocatedTime,
+      getById,
+      add,
+    };
   },
   {
     persist: true,

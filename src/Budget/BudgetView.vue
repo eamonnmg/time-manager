@@ -6,6 +6,7 @@ import ActivityPicker from "@/Activities/ActivityPicker.vue";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { computed } from "vue";
+import { msToHours } from "@/Budget/budgetUtils";
 
 const budgetId = useRoute().params.budgetId;
 
@@ -24,6 +25,11 @@ const budgetActivities = computed(() => {
 function onActivitySelected(e) {
   budgetActivityStore.add(budgetId.toString(), e[0].id);
   console.log("activity selected", e);
+}
+
+function onActivityTimeChanged(activity, e) {
+  console.log("activity time changed", activity.activityId, e.target.value);
+  budgetActivityStore.setAllocatedTime(activity.activityId, e.target.value);
 }
 </script>
 
@@ -45,6 +51,17 @@ function onActivitySelected(e) {
     <!--    // activies-->
     <div class="px-4 h-full divide-x space-x-4 flex">
       <div class="w-1/2 flex flex-col mt-6">
+        <div>
+          <progress
+            class="progress"
+            :value="
+              budgetActivityStore.totalAllocatedTimeForBudget(
+                budgetId.toString(),
+              )
+            "
+            :max="budget.duration"
+          ></progress>
+        </div>
         <table class="table">
           <!-- head -->
           <thead>
@@ -59,11 +76,17 @@ function onActivitySelected(e) {
               <td>{{ activity.activity.name }}</td>
               <td>
                 <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  class="range"
                   :value="activity.allocatedTime"
+                  type="number"
+                  min="0"
+                  :step="1"
+                  :max="
+                    budgetActivityStore.remainingTimeForBudget(
+                      budgetId.toString(),
+                    )
+                  "
+                  class="input input-bordered"
+                  @change="onActivityTimeChanged(activity, $event)"
                 />
               </td>
             </tr>
@@ -75,7 +98,17 @@ function onActivitySelected(e) {
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           Name: <input v-model="budget.name" type="text" />
           <br />
-          Duration: <input v-model="budget.duration" type="text" />
+          Duration Hours:
+          <input
+            :value="msToHours(budget.duration)"
+            type="number"
+            @input="
+              budgetStore.setBudgetDurationInHours(
+                budget.id,
+                $event.target.value,
+              )
+            "
+          />
           <br />
           Activities:
           <ActivityPicker

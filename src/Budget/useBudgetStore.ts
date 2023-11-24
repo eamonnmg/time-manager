@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import type { Budget } from "@/types";
+import type { Budget, BudgetId } from "@/types";
 
 const dayBudget: Budget = {
   id: "1",
@@ -35,14 +35,25 @@ export const useBudgetStore = defineStore(
       const targetIdx = budgets.value.findIndex(
         (b: Budget) => b.id === budget.id,
       );
-      if (!targetIdx) {
+      if (targetIdx < 0) {
         console.error("budget not found");
         return;
       }
-      budget.value[targetIdx] = budget;
+      budgets.value[targetIdx] = budget;
     }
 
-    return { budgets, getById, add, edit };
+    function setBudgetDurationInHours(budgetId: BudgetId, hours: number) {
+      const targetIdx = budgets.value.findIndex(
+        (b: Budget) => b.id === budgetId,
+      );
+      if (targetIdx < 0) {
+        console.error("budget not found");
+        return;
+      }
+      budgets.value[targetIdx].duration = hours * 60 * 60 * 1000;
+    }
+
+    return { budgets, getById, add, edit, setBudgetDurationInHours };
   },
   {
     persist: true,
