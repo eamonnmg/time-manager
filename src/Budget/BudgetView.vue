@@ -22,14 +22,19 @@ const budgetActivities = computed(() => {
   return budgetActivityStore.getAllForBudget(budgetId.toString());
 });
 
+const remainingTime = computed(() => {
+  return budgetActivityStore.remainingTimeForBudget(budgetId.toString());
+});
+
 function onActivitySelected(e) {
   budgetActivityStore.add(budgetId.toString(), e[0].id);
-  console.log("activity selected", e);
 }
 
 function onActivityTimeChanged(activity, e) {
-  console.log("activity time changed", activity.activityId, e.target.value);
-  budgetActivityStore.setAllocatedTime(activity.activityId, e.target.value);
+  budgetActivityStore.setAllocatedTime(
+    activity.activityId,
+    Number(e.target.value),
+  );
 }
 </script>
 
@@ -50,16 +55,18 @@ function onActivityTimeChanged(activity, e) {
     </AppHeader>
     <!--    // activies-->
     <div class="px-4 h-full divide-x space-x-4 flex">
-      <div class="w-1/2 flex flex-col mt-6">
+      <div class="w-2/3 flex flex-col mt-6">
         <div>
           <progress
             class="progress"
             :value="
-              budgetActivityStore.totalAllocatedTimeForBudget(
-                budgetId.toString(),
+              msToHours(
+                budgetActivityStore.totalAllocatedTimeForBudget(
+                  budgetId.toString(),
+                ),
               )
             "
-            :max="budget.duration"
+            :max="msToHours(budget.duration)"
           ></progress>
         </div>
         <table class="table">
@@ -74,19 +81,34 @@ function onActivityTimeChanged(activity, e) {
             <!-- row 1 -->
             <tr v-for="activity in budgetActivities" :key="activity.id">
               <td>{{ activity.activity.name }}</td>
-              <td>
+              <td class="flex space-x-2">
                 <input
-                  :value="activity.allocatedTime"
-                  type="number"
+                  :value="msToHours(activity.allocatedTime)"
+                  type="range"
+                  class="range"
                   min="0"
-                  :step="1"
-                  :max="
-                    budgetActivityStore.remainingTimeForBudget(
-                      budgetId.toString(),
+                  :max="msToHours(remainingTime + activity.allocatedTime)"
+                  @input="
+                    budgetActivityStore.setAllocatedTime(
+                      activity.id,
+                      $event.target.value,
                     )
                   "
+                />
+              </td>
+              <td>
+                <input
+                  :value="msToHours(activity.allocatedTime)"
+                  type="number"
                   class="input input-bordered"
-                  @change="onActivityTimeChanged(activity, $event)"
+                  min="0"
+                  :max="msToHours(remainingTime + activity.allocatedTime)"
+                  @input="
+                    budgetActivityStore.setAllocatedTime(
+                      activity.id,
+                      $event.target.value,
+                    )
+                  "
                 />
               </td>
             </tr>
@@ -94,7 +116,7 @@ function onActivityTimeChanged(activity, e) {
         </table>
       </div>
       <!--      config-->
-      <div class="w-1/2">
+      <div class="w-1/3">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           Name: <input v-model="budget.name" type="text" />
           <br />

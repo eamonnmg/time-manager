@@ -8,6 +8,7 @@ import type {
 } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
+import { hoursToMs } from "@/Budget/budgetUtils";
 
 // const dayBudget: Budget = {
 //   id: "1",
@@ -32,15 +33,15 @@ export const useBudgetActivityStore = defineStore(
       return budgetActivities.value.find((ba: BudgetActivity) => ba.id === id);
     }
 
-    function setAllocatedTime(activityId: string, allocatedTime: number) {
+    function setAllocatedTime(budgetActivityId: string, hours: number) {
       const targetIdx = budgetActivities.value.findIndex(
-        (ba: BudgetActivity) => ba.activityId === activityId,
+        (ba: BudgetActivity) => ba.id === budgetActivityId,
       );
-      if (targetIdx === undefined) {
+      if (targetIdx < 0) {
         console.error("budget activity not found");
         return;
       }
-      budgetActivities.value[targetIdx].allocatedTime = allocatedTime;
+      budgetActivities.value[targetIdx].allocatedTime = hoursToMs(hours);
     }
 
     function add(budgetId: string, activityId: string) {
