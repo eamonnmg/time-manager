@@ -26,6 +26,7 @@ export interface Budget {
    * Duration in milliseconds
    */
   duration: number;
+  occupiedTime: number;
 }
 
 export interface BudgetActivity {

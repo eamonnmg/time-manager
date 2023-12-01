@@ -66,7 +66,7 @@ function onActivityTimeChanged(activity, e) {
                 ),
               )
             "
-            :max="msToHours(budget.duration)"
+            :max="msToHours(budgetStore.getAvailableTimeForBudget(budgetId))"
           ></progress>
         </div>
         <table class="table">
@@ -126,6 +126,18 @@ function onActivityTimeChanged(activity, e) {
             type="number"
             @input="
               budgetStore.setBudgetDurationInHours(
+                budget.id,
+                $event.target.value,
+              )
+            "
+          />
+          <br />
+          Occupied time (sleep, work etc):
+          <input
+            :value="msToHours(budget.occupiedTime)"
+            type="number"
+            @input="
+              budgetStore.setBudgetOccupiedTimeInHours(
                 budget.id,
                 $event.target.value,
               )

@@ -91,7 +91,11 @@ export const useBudgetActivityStore = defineStore(
           console.error("budget not found");
           return 0;
         }
-        return budget.duration - totalAllocatedTimeForBudget.value(budgetId);
+        return (
+          budget.duration -
+          budget.occupiedTime -
+          totalAllocatedTimeForBudget.value(budgetId)
+        );
       };
     });
 
