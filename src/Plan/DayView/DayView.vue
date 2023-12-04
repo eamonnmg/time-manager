@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import type { TimeBlock } from "@/types";
+import type { TimeBlock, TimeBlockWithActivity } from "@/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import { scaleTime } from "d3";
-import { endOfToday, startOfToday } from "date-fns";
+import { endOfDay, startOfDay } from "date-fns";
+import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 // import { useElementSize } from "@vueuse/core";
 
 interface Props {
-  timeBlocks: TimeBlock[];
+  day: Date;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  timeBlocks: () => [],
-});
+const props = defineProps<Props>();
 
 /**
  * The data structure for an activity in the day view.
@@ -27,6 +26,11 @@ const container = ref(null);
 const containerNav = ref(null);
 const containerOffset = ref(null);
 const nowLine = ref(null);
+const timeBlockStore = useTimeBlockStore();
+
+const timeBlocks = computed<TimeBlockWithActivity[]>(() => {
+  return timeBlockStore.timeBlocksWithActivityForDay(props.day);
+});
 
 const startGridOffsetRows = 3;
 // const rows = 288 + startGridOffsetRows; // break 24 hour day into 288 5 minute segments
@@ -82,7 +86,7 @@ function timeBlockToDayViewTimeBlock(timeBlock: TimeBlock): DayViewTimeBlock {
 }
 
 const dayViewTimeBlocks = computed(() => {
-  return props.timeBlocks.map(timeBlockToDayViewTimeBlock);
+  return timeBlocks.value.map(timeBlockToDayViewTimeBlock);
 });
 
 onMounted(() => {
@@ -99,7 +103,10 @@ onMounted(() => {
 // const { height } = useElementSize(container);
 
 const timeScale = computed(() => {
-  return scaleTime().domain([startOfToday(), endOfToday()]).range([0, 2800]);
+  console.log("timeScale", [startOfDay(props.day), endOfDay(props.day)]);
+  return scaleTime()
+    .domain([startOfDay(props.day), endOfDay(props.day)])
+    .range([0, 2800]);
 });
 </script>
 
@@ -166,7 +173,7 @@ const timeScale = computed(() => {
       <!-- Horizontal lines -->
 
       <div class="relative w-full h-full">
-        <HourDividerLines :time-scale="timeScale">
+        <HourDividerLines :day="day" :time-scale="timeScale">
           <template #offset>
             <div ref="containerOffset" class="row-end-1 h-7"></div>
           </template>
@@ -185,7 +192,10 @@ const timeScale = computed(() => {
           <li
             v-for="timeBlock in dayViewTimeBlocks"
             :key="timeBlock.activity.name"
-            class="absolute left-0 w-full right-0 top-0 bottom-0 mt-px flex"
+            :class="[
+              'absolute left-0 w-full right-0 top-0 bottom-0 mt-px flex',
+              timeBlock.activity.color,
+            ]"
             :style="{
               height: `${timeBlock.height}px`,
               transform: `translateY(${timeBlock.y}px)`,

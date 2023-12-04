@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { scaleTime } from "d3";
-import { endOfToday, startOfToday, add, format } from "date-fns";
+import { add, format, startOfDay } from "date-fns";
 import { computed } from "vue";
 
 interface Props {
   timeScale: any;
+  day: Date;
 }
 
 const props = defineProps<Props>();
@@ -15,7 +15,7 @@ const props = defineProps<Props>();
 
 const hourLabels = computed(() => {
   return Array.from({ length: 24 }).map((div, i) => {
-    const dateTime = add(startOfToday(), { hours: i });
+    const dateTime = add(startOfDay(props.day), { hours: i });
     return {
       dateTime,
       label: format(dateTime, "h a"),
@@ -26,7 +26,7 @@ const hourLabels = computed(() => {
 
 const halfHourDividerLines = computed(() => {
   return Array.from({ length: 48 }).map((div, i) => {
-    const dateTime = add(startOfToday(), { minutes: i * 30 });
+    const dateTime = add(startOfDay(props.day), { minutes: i * 30 });
     return {
       dateTime,
       label: format(dateTime, "h a"),

@@ -1,8 +1,15 @@
+export type ModelId = string | number;
+
 export interface TimeBlock {
-  activity: Activity;
+  id: ModelId;
+  activityId: ModelId;
   start: string;
   end: string;
   color: string;
+}
+
+export interface TimeBlockWithActivity extends TimeBlock {
+  activity: Activity;
 }
 
 export interface Day {
@@ -11,16 +18,14 @@ export interface Day {
 }
 
 export interface Activity {
-  id: string | number;
+  id: ModelId;
   name: string;
   color: string;
   nestedActivities: Activity[];
 }
 
-export type BudgetId = string | number;
-
 export interface Budget {
-  id: BudgetId;
+  id: ModelId;
   name: string;
   /**
    * Duration in milliseconds
@@ -30,7 +35,7 @@ export interface Budget {
 }
 
 export interface BudgetActivity {
-  id: string | number;
+  id: ModelId;
   budgetId: string | number;
   activityId: string | number;
   /**

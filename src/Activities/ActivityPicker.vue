@@ -14,7 +14,7 @@ import type { Activity } from "@/types";
 interface Props {
   modelValue: Activity[] | Activity;
   activities: Activity[];
-  label: string;
+  label?: string;
   multiple?: boolean;
 }
 

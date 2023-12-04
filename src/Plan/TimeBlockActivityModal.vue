@@ -25,8 +25,8 @@ const duration = ref(30);
 
 const activityTimeBlock = computed<TimeBlock>(() => {
   return {
-    activity: activity.value,
-    start: start.value,
+    activityId: activity.value.id,
+    start: new Date(start.value),
     end: add(new Date(start.value), { minutes: duration.value }),
     color: "bg-green-50",
   };
