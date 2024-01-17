@@ -42,12 +42,14 @@ export const useActivitiesStore = defineStore(
       return activities.value.find((a: Activity) => a.id === id);
     }
 
-    function add(activity: Activity) {
+    function add(activity: Activity): Activity {
       const activityId = self.crypto.randomUUID();
-      activities.value.push({
+      const newActivity = {
         ...activity,
         id: activityId,
-      });
+      };
+      activities.value.push(newActivity);
+      return newActivity;
     }
 
     function edit(activity: Activity) {

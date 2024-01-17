@@ -40,6 +40,10 @@ function addTimeBlock() {
 }
 
 function submit() {
+  if (!activity.value?.id) {
+    alert("Please select an activity");
+    return;
+  }
   addTimeBlock();
   close();
 }
@@ -101,14 +105,10 @@ function submit() {
 
                 <div class="mt-8">
                   <div>
-                    <label
-                      for="email"
-                      class="block text-sm font-medium leading-6 text-gray-900"
-                      >Name</label
-                    >
                     <div class="mt-2">
                       <activity-picker
                         v-model="activity"
+                        label="Activity"
                         :multiple="false"
                         :activities="activities"
                       />

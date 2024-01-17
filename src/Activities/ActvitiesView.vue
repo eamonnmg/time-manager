@@ -4,7 +4,6 @@ import AddActivityModal from "@/Activities/AddEditActivityModal.vue";
 import { nextTick, ref } from "vue";
 import AppHeader from "@/Plan/AppHeader.vue";
 import type { Activity } from "@/types";
-import { format } from "date-fns";
 
 const { activities, add, edit } = useActivitiesStore();
 const showAddActivityModal = ref(false);
