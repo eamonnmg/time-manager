@@ -19,7 +19,12 @@ interface Props {
   timeBlock?: TimeBlock;
 }
 const props = defineProps<Props>();
-const emit = defineEmits(["update:open", "addTimeBlock", "editTimeBlock"]);
+const emit = defineEmits([
+  "update:open",
+  "addTimeBlock",
+  "editTimeBlock",
+  "removeTimeBlock",
+]);
 
 const activityStore = useActivitiesStore();
 const editMode = computed<boolean>(() => {
@@ -69,6 +74,11 @@ function submit() {
   } else {
     addTimeBlock();
   }
+  close();
+}
+
+function remove() {
+  emit("removeTimeBlock", props.timeBlock.id);
   close();
 }
 </script>
@@ -182,12 +192,16 @@ function submit() {
                   </div>
                 </div>
               </div>
-              <div class="mt-5 sm:mt-6">
+              <div class="flex justify-between mt-5 sm:mt-6">
                 <button
+                  v-if="editMode"
                   type="button"
-                  class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  @click="submit"
+                  class="btn btn-warning"
+                  @click="remove"
                 >
+                  Delete
+                </button>
+                <button type="button" class="btn btn-primary" @click="submit">
                   {{ editMode ? "Edit" : "Add" }} time block
                 </button>
               </div>

@@ -37,17 +37,22 @@ function editTimeBlock(timeBlock: TimeBlock) {
   timeBlockStore.edit(timeBlock);
   selectedTimeBlock.value = undefined;
 }
+
+function removeTimeBlock(timeBlock: TimeBlock) {
+  timeBlockStore.remove(timeBlock);
+  selectedTimeBlock.value = undefined;
+}
 </script>
 
 <template>
   <TimeBlockActivityModal
     v-if="showTimeBlockActivityModal"
-    :key="selectedTimeBlock?.id"
     v-model:open="showTimeBlockActivityModal"
     :activities="activityStore.activities"
     :time-block="selectedTimeBlock"
     @add-time-block="timeBlockStore.add"
     @edit-time-block="editTimeBlock"
+    @remove-time-block="removeTimeBlock"
   />
   <div class="flex h-full w-full flex-col">
     <AppHeader>

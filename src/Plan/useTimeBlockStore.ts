@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import type { TimeBlock } from "@/types";
+import type { ModelId, TimeBlock } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
 
@@ -51,12 +51,19 @@ export const useTimeBlockStore = defineStore(
       timeBlocks.value[targetTimeBlockIdx] = timeBlock;
     }
 
+    function remove(id: ModelId) {
+      timeBlocks.value = timeBlocks.value.filter(
+        (tb: TimeBlock) => tb.id !== id,
+      );
+    }
+
     return {
       timeBlocks,
       timeBlocksWithActivity,
       timeBlocksWithActivityForDay,
       add,
       edit,
+      remove,
     };
   },
   {
