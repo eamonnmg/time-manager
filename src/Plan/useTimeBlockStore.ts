@@ -1,9 +1,8 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type { TimeBlock } from "@/types";
-import { timeBlocks as testdata } from "@/utils/testdata";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
-import { endOfDay, endOfHour, isWithinInterval, startOfDay } from "date-fns";
+import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
 
 export const useTimeBlockStore = defineStore(
   "timeBlocks",
@@ -45,7 +44,7 @@ export const useTimeBlockStore = defineStore(
       const targetTimeBlockIdx = timeBlocks.value.findIndex(
         (tb: TimeBlock) => tb.id === timeBlock.id,
       );
-      if (!targetTimeBlockIdx) {
+      if (targetTimeBlockIdx > 0) {
         console.error("timeBlock not found");
         return;
       }

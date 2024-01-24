@@ -12,6 +12,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+defineEmits(["editTimeBlock"]);
 
 /**
  * The data structure for an activity in the day view.
@@ -32,52 +33,16 @@ const timeBlocks = computed<TimeBlockWithActivity[]>(() => {
   return timeBlockStore.timeBlocksWithActivityForDay(props.day);
 });
 
-const startGridOffsetRows = 3;
-// const rows = 288 + startGridOffsetRows; // break 24 hour day into 288 5 minute segments
-
-// function timeBlockToDayViewTimeBlock(timeBlock: TimeBlock): DayViewTimeBlock {
-//   const startHour = new Date(timeBlock.start).getHours();
-//   const startMinute = new Date(timeBlock.start).getMinutes();
-//   const endHour = new Date(timeBlock.end).getHours();
-//   const endMinute = new Date(timeBlock.end).getMinutes();
-//
-//   const startMin = startHour * 60 + startMinute;
-//   const endMin = endHour * 60 + endMinute;
-//
-//   const startRow = Math.round(startMin / 5);
-//   const duration = Math.round((endMin - startMin) / 5);
-//
-//   return {
-//     ...timeBlock,
-//     row: startRow + startGridOffsetRows,
-//     span: duration,
-//     startTimeLabel: new Date(timeBlock.start).toLocaleTimeString([], {
-//       hour: "2-digit",
-//       minute: "2-digit",
-//     }),
-//   };
-// }
-
 function timeBlockToDayViewTimeBlock(timeBlock: TimeBlock): DayViewTimeBlock {
-  // const startHour = new Date(timeBlock.start).getHours();
-  // const startMinute = new Date(timeBlock.start).getMinutes();
-  // const endHour = new Date(timeBlock.end).getHours();
-  // const endMinute = new Date(timeBlock.end).getMinutes();
-  //
-  // const startMin = startHour * 60 + startMinute;
-  // const endMin = endHour * 60 + endMinute;
-  //
-  // const startRow = Math.round(startMin / 5);
-  // const duration = Math.round((endMin - startMin) / 5);
-
   console.log(timeScale.value(new Date()));
 
   return {
     ...timeBlock,
     y: timeScale.value(new Date(timeBlock.start)),
     height:
-      timeScale.value(new Date(timeBlock.end)) -
-      timeScale.value(new Date(timeBlock.start)),
+      timeScale.value(
+        new Date(new Date(timeBlock.start).getTime() + timeBlock.duration),
+      ) - timeScale.value(new Date(timeBlock.start)),
     startTimeLabel: new Date(timeBlock.start).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -200,6 +165,7 @@ const timeScale = computed(() => {
               height: `${timeBlock.height}px`,
               transform: `translateY(${timeBlock.y}px)`,
             }"
+            @click="() => $emit('editTimeBlock', timeBlock)"
           >
             <a
               href="#"

@@ -3,10 +3,15 @@ export type ModelId = string | number;
 export interface TimeBlock {
   id: ModelId;
   activityId: ModelId;
-  start: string;
-  end: string;
+  start: Date;
+  /**
+   * Duration in milliseconds
+   */
+  duration: number;
   color: string;
 }
+
+export type TimeBlockCreate = Omit<TimeBlock, "id">;
 
 export interface TimeBlockWithActivity extends TimeBlock {
   activity: Activity;

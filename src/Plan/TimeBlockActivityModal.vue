@@ -8,26 +8,39 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { ClockIcon } from "@heroicons/vue/24/outline";
-import type { Activity, TimeBlock } from "@/types";
-import { add } from "date-fns";
+import type { Activity, TimeBlock, TimeBlockCreate } from "@/types";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";
+import { useActivitiesStore } from "@/Activities/activitiesStore";
+import { minutesToMs, msToMinutes } from "@/Budget/budgetUtils";
 
 interface Props {
   open: boolean;
   activities: Activity[];
+  timeBlock?: TimeBlock;
 }
-defineProps<Props>();
-const emit = defineEmits(["update:open", "addTimeBlock"]);
+const props = defineProps<Props>();
+const emit = defineEmits(["update:open", "addTimeBlock", "editTimeBlock"]);
+
+const activityStore = useActivitiesStore();
+const editMode = computed<boolean>(() => {
+  return Boolean(props.timeBlock);
+});
 
 const activity = ref<Activity>(undefined);
 const start = ref(new Date().toISOString().slice(0, 19));
-const duration = ref(30);
+const duration = ref(minutesToMs(60));
 
-const activityTimeBlock = computed<TimeBlock>(() => {
+if (editMode.value) {
+  activity.value = activityStore.getById(props.timeBlock.activityId);
+  start.value = new Date(props.timeBlock.start).toISOString().slice(0, 19);
+  duration.value = props.timeBlock.duration;
+}
+
+const activityTimeBlock = computed<TimeBlockCreate>(() => {
   return {
     activityId: activity.value.id,
     start: new Date(start.value),
-    end: add(new Date(start.value), { minutes: duration.value }),
+    duration: duration.value,
     color: "bg-green-50",
   };
 });
@@ -39,12 +52,23 @@ function addTimeBlock() {
   emit("addTimeBlock", activityTimeBlock.value);
 }
 
+function editTimeBlock() {
+  emit("editTimeBlock", {
+    ...activityTimeBlock.value,
+    id: props.timeBlock.id,
+  });
+}
+
 function submit() {
   if (!activity.value?.id) {
     alert("Please select an activity");
     return;
   }
-  addTimeBlock();
+  if (editMode.value) {
+    editTimeBlock();
+  } else {
+    addTimeBlock();
+  }
   close();
 }
 </script>
@@ -143,12 +167,13 @@ function submit() {
                       >
                       <input
                         id="duration"
-                        v-model="duration"
+                        :value="msToMinutes(duration)"
                         type="number"
                         name="duration"
                         class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         placeholder="Enter duration in minutes"
                         aria-describedby="end-time-description"
+                        @input="duration = minutesToMs($event.target.value)"
                       />
                     </div>
                     <p id="name-description" class="mt-2 text-sm text-gray-500">
@@ -163,7 +188,7 @@ function submit() {
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   @click="submit"
                 >
-                  Add time block
+                  {{ editMode ? "Edit" : "Add" }} time block
                 </button>
               </div>
             </DialogPanel>

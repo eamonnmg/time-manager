@@ -7,6 +7,7 @@ import { add, format, sub } from "date-fns";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid";
+import type { TimeBlock } from "@/types";
 
 const timeBlockStore = useTimeBlockStore();
 const showTimeBlockActivityModal = ref(false);
@@ -26,14 +27,27 @@ function previousDay() {
 function resetDay() {
   currentDay.value = new Date();
 }
+const selectedTimeBlock = ref<TimeBlock>(undefined);
+function showEditTimeBlockModal(timeBlock: TimeBlock) {
+  showTimeBlockActivityModal.value = true;
+  selectedTimeBlock.value = timeBlock;
+}
+
+function editTimeBlock(timeBlock: TimeBlock) {
+  timeBlockStore.edit(timeBlock);
+  selectedTimeBlock.value = undefined;
+}
 </script>
 
 <template>
   <TimeBlockActivityModal
     v-if="showTimeBlockActivityModal"
+    :key="selectedTimeBlock?.id"
     v-model:open="showTimeBlockActivityModal"
     :activities="activityStore.activities"
+    :time-block="selectedTimeBlock"
     @add-time-block="timeBlockStore.add"
+    @edit-time-block="editTimeBlock"
   />
   <div class="flex h-full w-full flex-col">
     <AppHeader>
@@ -89,7 +103,7 @@ function resetDay() {
       </button>
     </AppHeader>
     <div class="isolate flex flex-auto overflow-hidden bg-white">
-      <DayView :day="currentDay" />
+      <DayView :day="currentDay" @editTimeBlock="showEditTimeBlockModal" />
     </div>
   </div>
 </template>

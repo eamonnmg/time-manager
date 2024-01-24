@@ -27,7 +27,7 @@ const remainingTime = computed(() => {
 });
 
 function onActivitySelected(e) {
-  budgetActivityStore.add(budgetId.toString(), e[0].id);
+  budgetActivityStore.add(budgetId.toString(), e.id);
 }
 
 function onActivityTimeChanged(activity, e) {
@@ -147,6 +147,7 @@ function onActivityTimeChanged(activity, e) {
           Activities:
           <ActivityPicker
             :activities="activityStore.activities"
+            :multiple="false"
             @update:model-value="onActivitySelected"
           />
         </div>
