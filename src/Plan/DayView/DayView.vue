@@ -5,6 +5,7 @@ import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import { scaleTime } from "d3";
 import { endOfDay, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
+import { minutesToMs } from "@/Budget/budgetUtils";
 // import { useElementSize } from "@vueuse/core";
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-defineEmits(["editTimeBlock"]);
+const emit = defineEmits(["editTimeBlock", "timelineClicked"]);
 
 /**
  * The data structure for an activity in the day view.
@@ -73,10 +74,22 @@ const timeScale = computed(() => {
     .domain([startOfDay(props.day), endOfDay(props.day)])
     .range([0, 2800]);
 });
+
+//create timeblock at position
+function onTimelineClick(e) {
+  const time = timeScale.value.invert(e.offsetY + e.target.scrollTop);
+
+  emit("timelineClicked", time);
+  // timeBlockStore.add(timeBlock);
+}
 </script>
 
 <template>
-  <div ref="container" class="flex test flex-auto flex-col overflow-auto">
+  <div
+    ref="container"
+    class="flex test flex-auto flex-col overflow-auto"
+    @click="onTimelineClick"
+  >
     <div
       ref="containerNav"
       class="sticky top-0 z-10 grid flex-none grid-cols-7 bg-white text-xs text-gray-500 shadow ring-1 ring-black ring-opacity-5 md:hidden"
@@ -165,7 +178,7 @@ const timeScale = computed(() => {
               height: `${timeBlock.height}px`,
               transform: `translateY(${timeBlock.y}px)`,
             }"
-            @click="() => $emit('editTimeBlock', timeBlock)"
+            @click.stop="() => $emit('editTimeBlock', timeBlock)"
           >
             <a
               href="#"

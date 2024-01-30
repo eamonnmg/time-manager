@@ -33,6 +33,16 @@ function showEditTimeBlockModal(timeBlock: TimeBlock) {
   selectedTimeBlock.value = timeBlock;
 }
 
+function createTimeBlockAtTime(time: Date) {
+  showTimeBlockActivityModal.value = true;
+  selectedTimeBlock.value = {
+    start: time,
+    duration: 60 * 60 * 1000,
+    activityId: "",
+    color: "",
+  };
+}
+
 function editTimeBlock(timeBlock: TimeBlock) {
   timeBlockStore.edit(timeBlock);
   selectedTimeBlock.value = undefined;
@@ -108,7 +118,11 @@ function removeTimeBlock(timeBlock: TimeBlock) {
       </button>
     </AppHeader>
     <div class="isolate flex flex-auto overflow-hidden bg-white">
-      <DayView :day="currentDay" @editTimeBlock="showEditTimeBlockModal" />
+      <DayView
+        :day="currentDay"
+        @editTimeBlock="showEditTimeBlockModal"
+        @timeline-clicked="createTimeBlockAtTime"
+      />
     </div>
   </div>
 </template>
