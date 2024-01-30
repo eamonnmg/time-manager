@@ -32,11 +32,18 @@ function showEditTimeBlockModal(timeBlock: TimeBlock) {
   showTimeBlockActivityModal.value = true;
   selectedTimeBlock.value = timeBlock;
 }
-
+function roundToNearest15Minutes(date) {
+  const minutes = date.getMinutes();
+  const roundedMinutes = Math.round(minutes / 15) * 15;
+  date.setMinutes(roundedMinutes);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  return date;
+}
 function createTimeBlockAtTime(time: Date) {
   showTimeBlockActivityModal.value = true;
   selectedTimeBlock.value = {
-    start: time,
+    start: roundToNearest15Minutes(time),
     duration: 60 * 60 * 1000,
     activityId: "",
     color: "",
