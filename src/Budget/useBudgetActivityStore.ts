@@ -38,7 +38,7 @@ export const useBudgetActivityStore = defineStore(
       const targetIdx = budgetActivities.value.findIndex(
         (ba: BudgetActivity) => ba.id === budgetActivityId,
       );
-      if (targetIdx < 0) {
+      if (targetIdx === -1) {
         console.error("budget activity not found");
         return;
       }

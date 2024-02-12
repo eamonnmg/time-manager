@@ -56,7 +56,7 @@ export const useActivitiesStore = defineStore(
       const targetActivityIdx = activities.value.findIndex(
         (a: Activity) => a.id === activity.id,
       );
-      if (!targetActivityIdx) {
+      if (targetActivityIdx === -1) {
         console.error("activity not found");
         return;
       }

@@ -93,7 +93,7 @@ export const useBudgetPeriodStore = defineStore(
       const targetIdx = budgetsPeriods.value.findIndex(
         (b: BudgetPeriod) => b.id === budgetPeriod.id,
       );
-      if (targetIdx < 0) {
+      if (targetIdx === -1) {
         console.error("budget not found");
         return;
       }

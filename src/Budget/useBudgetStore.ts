@@ -58,7 +58,7 @@ export const useBudgetStore = defineStore(
       const targetIdx = budgets.value.findIndex(
         (b: Budget) => b.id === budget.id,
       );
-      if (targetIdx < 0) {
+      if (targetIdx === -1) {
         console.error("budget not found");
         return;
       }
@@ -69,7 +69,7 @@ export const useBudgetStore = defineStore(
       const targetIdx = budgets.value.findIndex(
         (b: Budget) => b.id === budgetId,
       );
-      if (targetIdx < 0) {
+      if (targetIdx === -1) {
         console.error("budget not found");
         return;
       }
@@ -80,7 +80,7 @@ export const useBudgetStore = defineStore(
       const targetIdx = budgets.value.findIndex(
         (b: Budget) => b.id === budgetId,
       );
-      if (targetIdx < 0) {
+      if (targetIdx === -1) {
         console.error("budget not found");
         return;
       }

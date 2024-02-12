@@ -57,7 +57,7 @@ export const useTimeBlockStore = defineStore(
       const targetTimeBlockIdx = timeBlocks.value.findIndex(
         (tb: TimeBlock) => tb.id === timeBlock.id,
       );
-      if (targetTimeBlockIdx > 0) {
+      if (targetTimeBlockIdx === -1) {
         console.error("timeBlock not found");
         return;
       }
