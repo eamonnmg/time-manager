@@ -32,6 +32,19 @@ export const useTimeBlockStore = defineStore(
       };
     });
 
+    const timeBlocksWithActivityForDateRange = computed(() => {
+      return (start: Date, end: Date) => {
+        return timeBlocksWithActivity.value.filter((tb: TimeBlock) => {
+          const x = isWithinInterval(new Date(tb.start), {
+            start: new Date(start),
+            end: new Date(end),
+          });
+          console.log("timeBlocksWithActivityForDateRange", x);
+          return x;
+        });
+      };
+    });
+
     function add(timeBlock: TimeBlock) {
       const timeBlockId = self.crypto.randomUUID();
       timeBlocks.value.push({
@@ -61,6 +74,7 @@ export const useTimeBlockStore = defineStore(
       timeBlocks,
       timeBlocksWithActivity,
       timeBlocksWithActivityForDay,
+      timeBlocksWithActivityForDateRange,
       add,
       edit,
       remove,

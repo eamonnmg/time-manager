@@ -64,3 +64,7 @@ export interface BudgetPeriod {
 
 export interface BudgetPeriodCreate
   extends Omit<BudgetPeriod, "id" | "endDate"> {}
+
+export interface BudgetPeriodWithBudget extends BudgetPeriod {
+  budget: Budget;
+}

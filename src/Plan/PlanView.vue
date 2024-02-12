@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import AppHeader from "@/Plan/AppHeader.vue";
 import DayView from "@/Plan/DayView/DayView.vue";
 import TimeBlockActivityModal from "@/Plan/TimeBlockActivityModal.vue";
@@ -7,9 +7,13 @@ import { add, format, sub } from "date-fns";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid";
-import type { TimeBlock } from "@/types";
+import type { BudgetActivityWithActivity, TimeBlock } from "@/types";
+import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
+import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
+import { msToHours } from "../Budget/budgetUtils";
 
 const timeBlockStore = useTimeBlockStore();
+const budgetPeriodStore = useBudgetPeriodStore();
 const showTimeBlockActivityModal = ref(false);
 
 const activityStore = useActivitiesStore();
@@ -59,6 +63,15 @@ function removeTimeBlock(timeBlock: TimeBlock) {
   timeBlockStore.remove(timeBlock);
   selectedTimeBlock.value = undefined;
 }
+
+const budgetActivityStore = useBudgetActivityStore();
+const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
+  const budgetId = budgetPeriodStore.activePeriod?.budgetId;
+  if (!budgetId) {
+    return [];
+  }
+  return budgetActivityStore.getAllForBudget(budgetId);
+});
 </script>
 
 <template>
@@ -130,8 +143,38 @@ function removeTimeBlock(timeBlock: TimeBlock) {
         @editTimeBlock="showEditTimeBlockModal"
         @timeline-clicked="createTimeBlockAtTime"
       />
-      <div v-if="true" class="border-l border-gray-100 w-0 md:w-[300px]">
-        Active Budget Period info here
+      <div
+        v-if="budgetPeriodStore.activePeriod"
+        class="border-l p-4 border-gray-100 w-0 md:w-[400px]"
+      >
+        <h3 class="text-2xl flex items-center">
+          Active Budget
+          <button class="badge badge-accent ml-4">
+            {{ budgetPeriodStore.activePeriod.budget.name }}
+          </button>
+        </h3>
+
+        <div class="flex flex-col">
+          <ul>
+            <li
+              v-for="budgetActivity in budgetActivities"
+              :key="budgetActivity.id"
+              class="flex justify-between"
+            >
+              <div>{{ budgetActivity.activity.name }}</div>
+              <div>
+                {{
+                  msToHours(
+                    budgetPeriodStore.totalAllocatedTimeForBudgetActivityInPeriod(
+                      budgetActivity.activity.id,
+                    ),
+                  )
+                }}
+                of {{ msToHours(budgetActivity.allocatedTime) }} hours allocated
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

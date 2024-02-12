@@ -5,6 +5,7 @@ import type {
   Budget,
   BudgetActivity,
   BudgetActivityWithActivity,
+  ModelId,
 } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
@@ -64,7 +65,7 @@ export const useBudgetActivityStore = defineStore(
     });
 
     const getAllForBudget = computed<
-      (budgetId: string) => BudgetActivityWithActivity[]
+      (budgetId: ModelId) => BudgetActivityWithActivity[]
     >(() => {
       return (budgetId: string): BudgetActivityWithActivity[] => {
         return budgetActivitiesWithActivity.value.filter(
