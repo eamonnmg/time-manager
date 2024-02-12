@@ -52,3 +52,9 @@ export interface BudgetActivity {
 export interface BudgetActivityWithActivity extends BudgetActivity {
   activity: Activity;
 }
+
+export interface BudgetPeriod {
+  id: ModelId;
+  budgetId: ModelId;
+  startDate: Date;
+}
