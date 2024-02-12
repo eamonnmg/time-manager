@@ -7,6 +7,8 @@ import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { computed } from "vue";
 import { msToHours } from "@/Budget/budgetUtils";
+import { apply } from "autoprefixer";
+import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 
 const budgetId = useRoute().params.budgetId;
 
@@ -36,6 +38,17 @@ function onActivityTimeChanged(activity, e) {
     Number(e.target.value),
   );
 }
+
+const budgetPeriodStore = useBudgetPeriodStore();
+function apply() {
+  if (budgetPeriodStore.activePeriod) {
+    alert("Another budget is currently active");
+  }
+  budgetPeriodStore.create({
+    budgetId: budgetId.toString(),
+    startDate: new Date(),
+  });
+}
 </script>
 
 <template>
@@ -51,6 +64,16 @@ function onActivityTimeChanged(activity, e) {
         <p class="mt-2 text-sm text-gray-700">
           A budget defines how you want to allocate your time for a period
         </p>
+      </template>
+      <template #default>
+        <button
+          v-if="!budgetStore.isActive(budgetId)"
+          class="btn btn-primary"
+          @click="apply"
+        >
+          Activate
+        </button>
+        <span v-else class="badge badge-info">Active</span>
       </template>
     </AppHeader>
     <!--    // activies-->

@@ -61,3 +61,6 @@ export interface BudgetPeriod {
   // will be overridden if budget period is cancelled
   endDate: Date;
 }
+
+export interface BudgetPeriodCreate
+  extends Omit<BudgetPeriod, "id" | "endDate"> {}

@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import type { BudgetPeriod, ModelId } from "@/types";
+import type { BudgetPeriod, BudgetPeriodCreate, ModelId } from "@/types";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
 import { add, addMilliseconds } from "date-fns";
 
@@ -14,7 +14,15 @@ export const useBudgetPeriodStore = defineStore(
       return budgetsPeriods.value.find((b: BudgetPeriod) => b.id === id);
     }
 
-    function create(budgetPeriod: Omit<BudgetPeriod, "id" | "endDate">) {
+    // there should only be one active period at a time
+    const activePeriod = computed<BudgetPeriod | undefined>(() => {
+      const now = new Date();
+      return budgetsPeriods.value.find((bp) => {
+        return new Date(bp.startDate) <= now && new Date(bp.endDate) > now;
+      });
+    });
+
+    function create(budgetPeriod: BudgetPeriodCreate) {
       const id = self.crypto.randomUUID();
       const budget = budgetStore.getById(budgetPeriod.budgetId);
       budgetsPeriods.value.push({
@@ -37,6 +45,7 @@ export const useBudgetPeriodStore = defineStore(
 
     return {
       budgetsPeriods,
+      activePeriod,
       edit,
       getById,
       create,

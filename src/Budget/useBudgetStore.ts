@@ -2,6 +2,7 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type { Budget, ModelId } from "@/types";
 import { hoursToMs } from "@/Budget/budgetUtils";
+import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 
 const dayBudget: Budget = {
   id: "1",
@@ -20,6 +21,7 @@ const weekBudget: Budget = {
 export const useBudgetStore = defineStore(
   "budgets",
   () => {
+    const budgetPeriodStore = useBudgetPeriodStore();
     const budgets = ref<Budget[]>([dayBudget, weekBudget]);
 
     function getById(id: ModelId): Budget | undefined {
@@ -34,6 +36,13 @@ export const useBudgetStore = defineStore(
           return 0;
         }
         return budget.duration - budget.occupiedTime;
+      };
+    });
+
+    // check budgetPeriods to see is this budget active?
+    const isActive = computed(() => {
+      return (budgetId: ModelId) => {
+        return budgetPeriodStore.activePeriod?.budgetId === budgetId;
       };
     });
 
@@ -86,6 +95,7 @@ export const useBudgetStore = defineStore(
       edit,
       setBudgetDurationInHours,
       setBudgetOccupiedTimeInHours,
+      isActive,
     };
   },
   {
