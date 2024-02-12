@@ -130,11 +130,8 @@ function removeTimeBlock(timeBlock: TimeBlock) {
         @editTimeBlock="showEditTimeBlockModal"
         @timeline-clicked="createTimeBlockAtTime"
       />
-      <div
-        v-if="true"
-        class="border-l border-gray-100 w-0 md:w-[300px]"
-      >
-        Budget
+      <div v-if="true" class="border-l border-gray-100 w-0 md:w-[300px]">
+        Active Budget Period info here
       </div>
     </div>
   </div>

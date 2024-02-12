@@ -57,4 +57,7 @@ export interface BudgetPeriod {
   id: ModelId;
   budgetId: ModelId;
   startDate: Date;
+  // defaults to Budget duration from startDate
+  // will be overridden if budget period is cancelled
+  endDate: Date;
 }

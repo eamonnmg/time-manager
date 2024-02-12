@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import type { Budget, BudgetId } from "@/types";
+import type { Budget, ModelId } from "@/types";
 import { hoursToMs } from "@/Budget/budgetUtils";
 
 const dayBudget: Budget = {
@@ -22,7 +22,7 @@ export const useBudgetStore = defineStore(
   () => {
     const budgets = ref<Budget[]>([dayBudget, weekBudget]);
 
-    function getById(id: string): Budget | undefined {
+    function getById(id: ModelId): Budget | undefined {
       return budgets.value.find((b: Budget) => b.id === id);
     }
 
@@ -38,10 +38,10 @@ export const useBudgetStore = defineStore(
     });
 
     function add(budget: Budget) {
-      const timeBlockId = self.crypto.randomUUID();
+      const id = self.crypto.randomUUID();
       budgets.value.push({
         ...budget,
-        id: timeBlockId,
+        id,
       });
     }
 
@@ -56,7 +56,7 @@ export const useBudgetStore = defineStore(
       budgets.value[targetIdx] = budget;
     }
 
-    function setBudgetDurationInHours(budgetId: BudgetId, hours: number) {
+    function setBudgetDurationInHours(budgetId: ModelId, hours: number) {
       const targetIdx = budgets.value.findIndex(
         (b: Budget) => b.id === budgetId,
       );
@@ -67,7 +67,7 @@ export const useBudgetStore = defineStore(
       budgets.value[targetIdx].duration = hoursToMs(hours);
     }
 
-    function setBudgetOccupiedTimeInHours(budgetId: BudgetId, hours: number) {
+    function setBudgetOccupiedTimeInHours(budgetId: ModelId, hours: number) {
       const targetIdx = budgets.value.findIndex(
         (b: Budget) => b.id === budgetId,
       );
