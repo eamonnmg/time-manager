@@ -8,6 +8,7 @@ export interface TimeBlock {
    * Duration in milliseconds
    */
   duration: number;
+  // todo: remove - color should come from activity
   color: string;
 }
 

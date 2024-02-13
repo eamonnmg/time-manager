@@ -91,7 +91,10 @@ function editActivity(activity: Activity) {
                   }}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  <div :class="['badge', activity.color]"></div>
+                  <div
+                    :class="['badge']"
+                    :style="`background-color: ${activity.color}`"
+                  ></div>
                 </td>
                 <td
                   class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"

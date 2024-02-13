@@ -5,6 +5,8 @@ import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import { scaleTime } from "d3";
 import { endOfDay, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
+import chroma from "chroma-js";
+
 import { minutesToMs } from "@/Budget/budgetUtils";
 // import { useElementSize } from "@vueuse/core";
 
@@ -81,6 +83,14 @@ function onTimelineClick(e) {
 
   emit("timelineClicked", time);
   // timeBlockStore.add(timeBlock);
+}
+
+function calcIdealTextColor(color: string) {
+  if (!color) return "#000";
+  const chromaColor = chroma(color);
+  const contrast = chroma.contrast("#fff", color);
+  console.log("contrast", Math.abs(4.5 - contrast));
+  return Math.abs(4.5 - contrast) < 2 ? "white" : "black";
 }
 </script>
 
@@ -165,14 +175,13 @@ function onTimelineClick(e) {
           }"
         ></div>
 
-        <!-- Events -->
+        <!-- TimeBlocks -->
         <ol class="relative w-full">
           <li
             v-for="timeBlock in dayViewTimeBlocks"
             :key="timeBlock.activity.name"
             :class="[
               'absolute left-0 w-full right-0 top-0 bottom-0 mt-px flex',
-              timeBlock.activity.color,
             ]"
             :style="{
               height: `${timeBlock.height}px`,
@@ -182,12 +191,15 @@ function onTimelineClick(e) {
           >
             <a
               href="#"
-              :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg ${timeBlock.activity.color} p-2 text-xs leading-5`"
+              :style="`background-color: ${
+                timeBlock.activity.color
+              }; color: ${calcIdealTextColor(timeBlock.activity.color)}`"
+              :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5`"
             >
-              <p class="order-1 font-semibold text-blue-700">
+              <p class="order-1 font-semibold">
                 {{ timeBlock.activity.name }}
               </p>
-              <p class="text-blue-500 group-hover:text-blue-700">
+              <p class="">
                 <time datetime="2022-01-22T06:00">{{
                   timeBlock.startTimeLabel
                 }}</time>
