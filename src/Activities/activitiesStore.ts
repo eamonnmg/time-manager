@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import type { Activity } from "@/types";
+import type { Activity, ModelId } from "@/types";
 
 const reading = {
   id: self.crypto.randomUUID(),
@@ -38,7 +38,7 @@ export const useActivitiesStore = defineStore(
       crimeAndPunishment,
     ]);
 
-    function getById(id: string | number): Activity | undefined {
+    function getById(id: ModelId): Activity | undefined {
       return activities.value.find((a: Activity) => a.id === id);
     }
 
