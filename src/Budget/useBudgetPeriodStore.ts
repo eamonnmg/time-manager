@@ -2,6 +2,8 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type {
   Activity,
+  BudgetActivity,
+  BudgetActivityWithActivity,
   BudgetPeriod,
   BudgetPeriodCreate,
   BudgetPeriodWithBudget,
@@ -56,30 +58,65 @@ export const useBudgetPeriodStore = defineStore(
       );
     });
 
-    function findActivity(activity: Activity, activityId: ModelId): Activity {
-      if (activity.id === activityId) {
-        return activity;
+    function findActivity(
+      tbActivities: Activity[],
+      activityId: ModelId,
+    ): Activity {
+      // if (activity.name === "golf") {
+      //   console.log("social", activity);
+      // }
+      // case 1: Timeblock activity matches the budget activity directly
+      // if (activity.id === activityId) {
+      //   return [activity];
+      // }
+
+      const index = tbActivities.findIndex((tbAct) => tbAct.id === activityId);
+      if (index !== -1) {
+        return tbActivities[index];
       }
-      if (activity.nestedActivities.length) {
-        for (const nestedActivity of activity.nestedActivities) {
-          return findActivity(nestedActivity, activityId);
+      // case 2 timeBlock activity matches budget activity indirectly via nested activities
+      // if (tbActivities.nestedActivities.length) {
+      //   // for (const nestedActivity of activity.nestedActivities) {
+      //   //   return findActivity(nestedActivity, activityId);
+      //   // }
+      //
+      //     findActivity(activity.nestedActivities, activityId);
+      // }
+
+      for (const act of tbActivities) {
+        if (act.nestedActivities.length) {
+          return findActivity(act.nestedActivities, activityId);
         }
       }
+      //   return findActivity(nestedActivity, activityId);
+      // }
+
+      return undefined;
     }
     const timeBlocksForBudgetActivity = computed(() => {
       return (activityId: ModelId) => {
         if (!timeBlocksInActivePeriod.value.length) {
           return [];
         }
-        return timeBlocksInActivePeriod.value.filter((tb) => {
-          return findActivity(tb.activity, activityId);
+        const x = timeBlocksInActivePeriod.value.filter((tb) => {
+          return Boolean(findActivity([tb.activity], activityId));
         });
+
+        console.log("timeBlocksForBudgetActivity", x);
+        return x;
       };
     });
 
     const totalAllocatedTimeForBudgetActivityInPeriod = computed(() => {
-      return (budgetActivityId: ModelId): number => {
-        const timeBlocks = timeBlocksForBudgetActivity.value(budgetActivityId);
+      return (budgetActivity: BudgetActivityWithActivity): number => {
+        console.log(
+          "budgetActivity",
+          budgetActivity.activity.name,
+          budgetActivity.activity.id,
+        );
+        const timeBlocks = timeBlocksForBudgetActivity.value(
+          budgetActivity.activity.id,
+        );
         console.log("timeBlocks", timeBlocks);
         return timeBlocks.reduce((acc, tb) => {
           return acc + tb.duration;

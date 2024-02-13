@@ -166,7 +166,7 @@ const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
                 {{
                   msToHours(
                     budgetPeriodStore.totalAllocatedTimeForBudgetActivityInPeriod(
-                      budgetActivity.activity.id,
+                      budgetActivity,
                     ),
                   )
                 }}
