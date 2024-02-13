@@ -7,7 +7,7 @@ import { endOfDay, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import chroma from "chroma-js";
 
-import { minutesToMs } from "@/Budget/budgetUtils";
+import { msToHours, msToMinutes } from "@/Budget/budgetUtils";
 // import { useElementSize } from "@vueuse/core";
 
 interface Props {
@@ -24,6 +24,8 @@ interface DayViewTimeBlock extends TimeBlock {
   y: number;
   height: number;
   startTimeLabel: string;
+  endTimeLabel: string;
+  durationLabel: string;
 }
 
 const container = ref(null);
@@ -39,17 +41,44 @@ const timeBlocks = computed<TimeBlockWithActivity[]>(() => {
 function timeBlockToDayViewTimeBlock(timeBlock: TimeBlock): DayViewTimeBlock {
   console.log(timeScale.value(new Date()));
 
+  function calcHeight() {
+    let height =
+      timeScale.value(
+        new Date(new Date(timeBlock.start).getTime() + timeBlock.duration),
+      ) - timeScale.value(new Date(timeBlock.start));
+
+    // cut off height if exceeds container
+    if (height + timeScale.value(new Date(timeBlock.start)) > 2800) {
+      height = 2800 - timeScale.value(new Date(timeBlock.start));
+    }
+
+    return height;
+  }
+
+  function calcDurationLable() {
+    const mins = msToMinutes(timeBlock.duration);
+    if (mins > 60) {
+      return `${msToHours(timeBlock.duration)} hrs`;
+    }
+
+    return `${mins} mins`;
+  }
+
   return {
     ...timeBlock,
     y: timeScale.value(new Date(timeBlock.start)),
-    height:
-      timeScale.value(
-        new Date(new Date(timeBlock.start).getTime() + timeBlock.duration),
-      ) - timeScale.value(new Date(timeBlock.start)),
+    height: calcHeight(),
     startTimeLabel: new Date(timeBlock.start).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     }),
+    endTimeLabel: new Date(
+      new Date(timeBlock.start).getTime() + timeBlock.duration,
+    ).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    durationLabel: calcDurationLable(),
   };
 }
 
@@ -87,7 +116,6 @@ function onTimelineClick(e) {
 
 function calcIdealTextColor(color: string) {
   if (!color) return "#000";
-  const chromaColor = chroma(color);
   const contrast = chroma.contrast("#fff", color);
   console.log("contrast", Math.abs(4.5 - contrast));
   return Math.abs(4.5 - contrast) < 2 ? "white" : "black";
@@ -196,14 +224,23 @@ function calcIdealTextColor(color: string) {
               }; color: ${calcIdealTextColor(timeBlock.activity.color)}`"
               :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5`"
             >
-              <p class="order-1 font-semibold">
-                {{ timeBlock.activity.name }}
-              </p>
-              <p class="">
-                <time datetime="2022-01-22T06:00">{{
-                  timeBlock.startTimeLabel
-                }}</time>
-              </p>
+              <div class="flex justify-between w-full h-full">
+                <div class="flex-col flex">
+                  <p class="order-1 font-semibold">
+                    {{ timeBlock.activity.name }}
+                  </p>
+                  <p class="">
+                    <time datetime="2022-01-22T06:00"
+                      >{{ timeBlock.startTimeLabel }} -
+                      {{ timeBlock.endTimeLabel }}</time
+                    >
+                  </p>
+                </div>
+
+                <div>
+                  {{ timeBlock.durationLabel }}
+                </div>
+              </div>
             </a>
           </li>
         </ol>
