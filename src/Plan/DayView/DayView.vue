@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import type { TimeBlock, TimeBlockWithActivity } from "@/types";
+import type { TimeBlockWithActivity } from "@/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";
 import { endOfDay, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
-import chroma from "chroma-js";
-
-import { msToHours, msToMinutes } from "@/Budget/budgetUtils";
-// import { useElementSize } from "@vueuse/core";
+import {
+  useDebounceFn,
+  usePointer,
+  useRafFn,
+  useThrottleFn,
+  watchThrottled,
+} from "@vueuse/core";
+import { hoursToMs } from "@/Budget/budgetUtils";
 
 interface Props {
   day: Date;
@@ -18,73 +22,13 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits(["editTimeBlock", "timelineClicked"]);
 
-/**
- * The data structure for an activity in the day view.
- */
-interface DayViewTimeBlock extends TimeBlock {
-  y: number;
-  height: number;
-  startTimeLabel: string;
-  endTimeLabel: string;
-  durationLabel: string;
-}
-
 const container = ref(null);
-const containerNav = ref(null);
 const containerOffset = ref(null);
 const nowLine = ref(null);
 const timeBlockStore = useTimeBlockStore();
 
 const timeBlocks = computed<TimeBlockWithActivity[]>(() => {
   return timeBlockStore.timeBlocksWithActivityForDay(props.day);
-});
-
-function timeBlockToDayViewTimeBlock(timeBlock: TimeBlock): DayViewTimeBlock {
-  console.log(timeScale.value(new Date()));
-
-  function calcHeight() {
-    let height =
-      timeScale.value(
-        new Date(new Date(timeBlock.start).getTime() + timeBlock.duration),
-      ) - timeScale.value(new Date(timeBlock.start));
-
-    // cut off height if exceeds container
-    if (height + timeScale.value(new Date(timeBlock.start)) > 2800) {
-      height = 2800 - timeScale.value(new Date(timeBlock.start));
-    }
-
-    return height;
-  }
-
-  function calcDurationLable() {
-    const mins = msToMinutes(timeBlock.duration);
-    if (mins > 60) {
-      return `${msToHours(timeBlock.duration)} hrs`;
-    }
-
-    return `${mins} mins`;
-  }
-
-  return {
-    ...timeBlock,
-    y: timeScale.value(new Date(timeBlock.start)),
-    height: calcHeight(),
-    startTimeLabel: new Date(timeBlock.start).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    endTimeLabel: new Date(
-      new Date(timeBlock.start).getTime() + timeBlock.duration,
-    ).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    durationLabel: calcDurationLable(),
-  };
-}
-
-const dayViewTimeBlocks = computed(() => {
-  return timeBlocks.value.map(timeBlockToDayViewTimeBlock);
 });
 
 onMounted(() => {
@@ -106,15 +50,88 @@ function onTimelineClick(e) {
   // timeBlockStore.add(timeBlock);
 }
 
-function calcIdealTextColor(color: string) {
-  if (!color) return "#000";
-  // chroma throws error if color is not valid
-  try {
-    const contrast = chroma.contrast("#fff", color);
-    return Math.abs(4.5 - contrast) < 2 ? "white" : "black";
-  } catch {
-    return "black";
-  }
+function roundToNearest15Minutes(date) {
+  const minutes = date.getMinutes();
+  const roundedMinutes = Math.round(minutes / 15) * 15;
+  date.setMinutes(roundedMinutes);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  return date;
+}
+
+const ghostY = ref(0);
+const ghostTime = ref(new Date());
+const ghostStartLabel = ref("");
+const ghostEndLabel = ref("");
+
+const ghostHeight = computed(() => {
+  return (
+    timeScale.value(ghostTime.value.getTime() + hoursToMs(1)) -
+    timeScale.value(ghostTime.value)
+  );
+});
+
+const newTimeBlockGhost = computed(() => {
+  // console.log(
+  //   "pointerPosition",
+  //   timeScale.value.invert(pointerPosition.y.value),
+  // );
+  return {
+    y: ghostY.value,
+    height: ghostHeight.value,
+    startTimeLabel: ghostStartLabel.value,
+    endTimeLabel: ghostEndLabel.value,
+    durationLabel: "1 hr",
+  };
+});
+
+const shouldShowNewTimeBlockGhosts = ref(false);
+
+const pointer = usePointer({
+  target: container,
+});
+
+watchThrottled(pointer.y, () => {
+  updateGhost();
+});
+
+const updateGhost = () => {
+  console.log("updateGhost");
+  shouldShowNewTimeBlockGhosts.value = true;
+  ghostTime.value = roundToNearest15Minutes(
+    timeScale.value.invert(
+      pointer.y.value + container.value.scrollTop - ghostHeight.value,
+    ),
+  );
+  ghostY.value = timeScale.value(ghostTime.value);
+  ghostStartLabel.value = ghostTime.value.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  ghostEndLabel.value = new Date(
+    ghostTime.value.getTime() + 60 * 60 * 1000,
+  ).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+// function onPointerOver(e) {
+//   shouldShowNewTimeBlockGhosts.value = true;
+//   const time = roundToNearest15Minutes(
+//     timeScale.value.invert(e.offsetY + e.target.scrollTop),
+//   );
+//   ghostY.value = timeScale.value(time);
+//
+//   console.log("onPointerOver", time);
+// }
+
+function onPointerOut(e) {
+  console.log("onPointerOut");
+  shouldShowNewTimeBlockGhosts.value = false;
+}
+
+function clickGhost() {
+  alert("clickGhost");
 }
 </script>
 
@@ -124,17 +141,17 @@ function calcIdealTextColor(color: string) {
     class="flex test flex-auto flex-col overflow-auto"
     @click="onTimelineClick"
   >
-    <div
-      ref="containerNav"
-      class="sticky top-0 z-10 grid flex-none grid-cols-7 bg-white text-xs text-gray-500 shadow ring-1 ring-black ring-opacity-5 md:hidden"
-    ></div>
     <div class="flex w-full flex-auto">
       <div class="w-14 flex-none bg-white ring-1 ring-gray-100" />
       <!--      <div class="grid flex-auto grid-cols-1 grid-rows-1">-->
       <!-- Horizontal lines -->
 
       <div class="relative w-full h-full">
-        <HourDividerLines :day="day" :time-scale="timeScale">
+        <HourDividerLines
+          class="pointer-events-none"
+          :day="day"
+          :time-scale="timeScale"
+        >
           <template #offset>
             <div ref="containerOffset" class="row-end-1 h-7"></div>
           </template>
@@ -142,13 +159,46 @@ function calcIdealTextColor(color: string) {
 
         <div
           ref="nowLine"
-          class="absolute z-10 h-[1px] w-full bg-red-500"
+          class="absolute pointer-events-none z-10 h-[1px] w-full bg-red-500"
           :style="{
             transform: `translateY(${timeScale(new Date())}px)`,
           }"
         ></div>
 
         <TimeBlocks :time-blocks="timeBlocks" :time-scale="timeScale" />
+        <div
+          v-show="pointer.isInside.value"
+          :class="[
+            'absolute  transition-transform duration-100  left-0 z-50 w-full right-0 top-0 bottom-0 mt-px flex',
+          ]"
+          :style="{
+            height: `${newTimeBlockGhost.height}px`,
+            transform: `translateY(${newTimeBlockGhost.y}px)`,
+          }"
+          @click.stop="clickGhost"
+        >
+          <div
+            class="group bg-gray-50 absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5"
+          >
+            <div class="flex justify-between w-full h-full">
+              <div class="flex-col flex">
+                <p class="order-1 font-semibold">
+                  Click to create new time block
+                </p>
+                <p class="">
+                  <time datetime="2022-01-22T06:00"
+                    >{{ newTimeBlockGhost.startTimeLabel }} -
+                    {{ newTimeBlockGhost.endTimeLabel }}</time
+                  >
+                </p>
+              </div>
+
+              <div>
+                {{ newTimeBlockGhost.durationLabel }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
