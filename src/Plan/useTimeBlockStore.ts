@@ -39,7 +39,11 @@ export const useTimeBlockStore = defineStore(
             start: new Date(start),
             end: new Date(end),
           });
-          console.log("timeBlocksWithActivityForDateRange", x);
+
+          if (x) {
+            console.log("XXX", new Date(tb.start), start, end);
+          }
+          // console.log("timeBlocksWithActivityForDateRange", x);
           return x;
         });
       };

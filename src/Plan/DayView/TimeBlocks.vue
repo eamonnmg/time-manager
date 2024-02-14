@@ -10,6 +10,12 @@ interface Props {
   timeScale: ScaleTime<number, number>;
 }
 
+const emit = defineEmits([
+  "editTimeBlock",
+  "pointerLeaveTimeBlock",
+  "pointerOverTimeBlock",
+]);
+
 /**
  * The data structure for an activity in the day view.
  */

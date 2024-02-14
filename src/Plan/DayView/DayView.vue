@@ -4,7 +4,7 @@ import type { TimeBlockWithActivity } from "@/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";
-import { endOfDay, startOfDay } from "date-fns";
+import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import {
   useDebounceFn,
@@ -26,6 +26,7 @@ const container = ref(null);
 const containerOffset = ref(null);
 const nowLine = ref(null);
 const timeBlockStore = useTimeBlockStore();
+const navHeight = 81;
 
 const timeBlocks = computed<TimeBlockWithActivity[]>(() => {
   return timeBlockStore.timeBlocksWithActivityForDay(props.day);
@@ -63,13 +64,91 @@ const ghostY = ref(0);
 const ghostTime = ref(new Date());
 const ghostStartLabel = ref("");
 const ghostEndLabel = ref("");
+const ghostHeight = ref(0);
+function calculateGhostHeight() {
+  let height =
+    timeScale.value(new Date(ghostTime.value.getTime() + hoursToMs(1))) -
+    timeScale.value(ghostTime.value);
 
-const ghostHeight = computed(() => {
-  return (
-    timeScale.value(ghostTime.value.getTime() + hoursToMs(1)) -
-    timeScale.value(ghostTime.value)
+  const overlappingBottomTimeBlock = timeBlocks.value.find((timeBlock) => {
+    return isWithinInterval(new Date(timeBlock.start), {
+      start: ghostTime.value,
+      end: new Date(ghostTime.value.getTime() + hoursToMs(1)),
+    });
+  });
+  if (overlappingBottomTimeBlock) {
+    height =
+      timeScale.value(new Date(overlappingBottomTimeBlock.start)) -
+      ghostY.value;
+  }
+
+  return height;
+}
+
+function getTimeBlockEnd(timeBlock) {
+  return new Date(new Date(timeBlock.start).getTime() + timeBlock.duration);
+}
+
+function calculateGhostY() {
+  let y = timeScale.value(ghostTime.value);
+  const overlappingTopTimeBlock = timeBlocks.value.find((timeBlock) => {
+    return isWithinInterval(getTimeBlockEnd(timeBlock), {
+      start: ghostTime.value,
+      end: new Date(ghostTime.value.getTime() + hoursToMs(1)),
+    });
+  });
+
+  if (overlappingTopTimeBlock) {
+    y = timeScale.value(getTimeBlockEnd(overlappingTopTimeBlock));
+  }
+
+  return y;
+}
+
+const isHoveringTimeBlock = computed(() => {
+  const pointerYDate = timeScale.value.invert(
+    pointer.y.value + container.value.scrollTop - navHeight,
   );
+  const res = timeBlocks.value.some((timeBlock) => {
+    return isWithinInterval(pointerYDate, {
+      start: new Date(timeBlock.start),
+      end: getTimeBlockEnd(timeBlock),
+    });
+  });
+  console.log("isHoveringTimeBlock", res);
+  return res;
 });
+
+// const ghostHeight = computed(() => {
+//   let height =
+//     timeScale.value(ghostTime.value.getTime() + hoursToMs(1)) -
+//     timeScale.value(ghostTime.value);
+//
+//   // overlaps another timeblock reduce height to fit
+//   console.log("test", new Date(ghostTime.value.getTime() + hoursToMs(1)));
+//   const overlappingBottomTimeBlock = timeBlocks.value.find((timeBlock) => {
+//     return (
+//       new Date(timeBlock.start) <
+//       new Date(ghostTime.value.getTime() + hoursToMs(1))
+//     );
+//   });
+//   // timeBlockStore.timeBlocksWithActivityForDateRange(
+//   //   ghostTime.value,
+//   //   new Date(ghostTime.value.getTime() + hoursToMs(1) - 1),
+//   // );
+//
+//   if (overlappingBottomTimeBlock) {
+//     console.log(
+//       "overlappingTimeBlock",
+//       overlappingBottomTimeBlock.activity.name,
+//     );
+//     height =
+//       timeScale.value(new Date(overlappingBottomTimeBlock.start)) -
+//       ghostY.value;
+//   }
+//
+//   return height;
+// });
 
 const newTimeBlockGhost = computed(() => {
   // console.log(
@@ -85,7 +164,9 @@ const newTimeBlockGhost = computed(() => {
   };
 });
 
-const shouldShowNewTimeBlockGhosts = ref(false);
+const shouldShowNewTimeBlockGhosts = computed(() => {
+  return pointer.isInside.value && !isHoveringTimeBlock.value;
+});
 
 const pointer = usePointer({
   target: container,
@@ -97,23 +178,25 @@ watchThrottled(pointer.y, () => {
 
 const updateGhost = () => {
   console.log("updateGhost");
-  shouldShowNewTimeBlockGhosts.value = true;
   ghostTime.value = roundToNearest15Minutes(
     timeScale.value.invert(
-      pointer.y.value + container.value.scrollTop - ghostHeight.value,
+      pointer.y.value + container.value.scrollTop - navHeight - 40,
     ),
   );
-  ghostY.value = timeScale.value(ghostTime.value);
+  ghostY.value = calculateGhostY();
+
+  ghostHeight.value = calculateGhostHeight();
+
   ghostStartLabel.value = ghostTime.value.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });
-  ghostEndLabel.value = new Date(
-    ghostTime.value.getTime() + 60 * 60 * 1000,
-  ).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  ghostEndLabel.value = timeScale.value
+    .invert(ghostY.value + ghostHeight.value)
+    .toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 };
 // function onPointerOver(e) {
 //   shouldShowNewTimeBlockGhosts.value = true;
@@ -124,11 +207,6 @@ const updateGhost = () => {
 //
 //   console.log("onPointerOver", time);
 // }
-
-function onPointerOut(e) {
-  console.log("onPointerOut");
-  shouldShowNewTimeBlockGhosts.value = false;
-}
 
 function clickGhost() {
   alert("clickGhost");
@@ -167,7 +245,7 @@ function clickGhost() {
 
         <TimeBlocks :time-blocks="timeBlocks" :time-scale="timeScale" />
         <div
-          v-show="pointer.isInside.value"
+          v-show="shouldShowNewTimeBlockGhosts"
           :class="[
             'absolute  transition-transform duration-100  left-0 z-50 w-full right-0 top-0 bottom-0 mt-px flex',
           ]"
