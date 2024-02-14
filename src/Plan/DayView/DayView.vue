@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import type { TimeBlock, TimeBlockWithActivity } from "@/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
+import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";
 import { endOfDay, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
@@ -141,53 +142,13 @@ function calcIdealTextColor(color: string) {
 
         <div
           ref="nowLine"
-          class="absolute h-[1px] w-full bg-red-500"
+          class="absolute z-10 h-[1px] w-full bg-red-500"
           :style="{
             transform: `translateY(${timeScale(new Date())}px)`,
           }"
         ></div>
 
-        <!-- TimeBlocks -->
-        <ol class="relative w-full">
-          <li
-            v-for="timeBlock in dayViewTimeBlocks"
-            :key="timeBlock.activity.name"
-            :class="[
-              'absolute left-0 w-full right-0 top-0 bottom-0 mt-px flex',
-            ]"
-            :style="{
-              height: `${timeBlock.height}px`,
-              transform: `translateY(${timeBlock.y}px)`,
-            }"
-            @click.stop="() => $emit('editTimeBlock', timeBlock)"
-          >
-            <a
-              href="#"
-              :style="`background-color: ${
-                timeBlock.activity.color
-              }; color: ${calcIdealTextColor(timeBlock.activity.color)}`"
-              :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5`"
-            >
-              <div class="flex justify-between w-full h-full">
-                <div class="flex-col flex">
-                  <p class="order-1 font-semibold">
-                    {{ timeBlock.activity.name }}
-                  </p>
-                  <p class="">
-                    <time datetime="2022-01-22T06:00"
-                      >{{ timeBlock.startTimeLabel }} -
-                      {{ timeBlock.endTimeLabel }}</time
-                    >
-                  </p>
-                </div>
-
-                <div>
-                  {{ timeBlock.durationLabel }}
-                </div>
-              </div>
-            </a>
-          </li>
-        </ol>
+        <TimeBlocks :time-blocks="timeBlocks" :time-scale="timeScale" />
       </div>
     </div>
   </div>
