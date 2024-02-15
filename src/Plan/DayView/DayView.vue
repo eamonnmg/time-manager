@@ -65,45 +65,34 @@ const ghostTime = ref(new Date());
 const ghostStartLabel = ref("");
 const ghostEndLabel = ref("");
 const ghostHeight = ref(0);
-function calculateGhostHeight() {
-  let height =
-    timeScale.value(new Date(ghostTime.value.getTime() + hoursToMs(1))) -
-    timeScale.value(ghostTime.value);
-
-  const overlappingBottomTimeBlock = timeBlocks.value.find((timeBlock) => {
-    return isWithinInterval(new Date(timeBlock.start), {
-      start: ghostTime.value,
-      end: new Date(ghostTime.value.getTime() + hoursToMs(1)),
-    });
-  });
-  if (overlappingBottomTimeBlock) {
-    height =
-      timeScale.value(new Date(overlappingBottomTimeBlock.start)) -
-      ghostY.value;
-  }
-
-  return height;
-}
 
 function getTimeBlockEnd(timeBlock) {
   return new Date(new Date(timeBlock.start).getTime() + timeBlock.duration);
 }
 
-function calculateGhostY() {
-  let y = timeScale.value(ghostTime.value);
-  const overlappingTopTimeBlock = timeBlocks.value.find((timeBlock) => {
-    return isWithinInterval(getTimeBlockEnd(timeBlock), {
-      start: ghostTime.value,
-      end: new Date(ghostTime.value.getTime() + hoursToMs(1)),
-    });
-  });
-
-  if (overlappingTopTimeBlock) {
-    y = timeScale.value(getTimeBlockEnd(overlappingTopTimeBlock));
+const targetGhostTime = computed(() => {
+  if (!container.value) {
+    return new Date();
   }
+  const time = roundToNearest15Minutes(
+    timeScale.value.invert(
+      pointer.y.value + container.value.scrollTop - navHeight - 40,
+    ),
+  );
 
-  return y;
-}
+  return time;
+});
+const targetGhostY = computed(() => {
+  return timeScale.value(targetGhostTime.value);
+});
+
+const targetGhostHeight = computed(function calculateGhostHeight() {
+  const height =
+    timeScale.value(new Date(ghostTime.value.getTime() + hoursToMs(1))) -
+    timeScale.value(ghostTime.value);
+
+  return height;
+});
 
 const isHoveringTimeBlock = computed(() => {
   const pointerYDate = timeScale.value.invert(
@@ -119,42 +108,33 @@ const isHoveringTimeBlock = computed(() => {
   return res;
 });
 
-// const ghostHeight = computed(() => {
-//   let height =
-//     timeScale.value(ghostTime.value.getTime() + hoursToMs(1)) -
-//     timeScale.value(ghostTime.value);
-//
-//   // overlaps another timeblock reduce height to fit
-//   console.log("test", new Date(ghostTime.value.getTime() + hoursToMs(1)));
-//   const overlappingBottomTimeBlock = timeBlocks.value.find((timeBlock) => {
-//     return (
-//       new Date(timeBlock.start) <
-//       new Date(ghostTime.value.getTime() + hoursToMs(1))
-//     );
-//   });
-//   // timeBlockStore.timeBlocksWithActivityForDateRange(
-//   //   ghostTime.value,
-//   //   new Date(ghostTime.value.getTime() + hoursToMs(1) - 1),
-//   // );
-//
-//   if (overlappingBottomTimeBlock) {
-//     console.log(
-//       "overlappingTimeBlock",
-//       overlappingBottomTimeBlock.activity.name,
-//     );
-//     height =
-//       timeScale.value(new Date(overlappingBottomTimeBlock.start)) -
-//       ghostY.value;
-//   }
-//
-//   return height;
-// });
+const collisionBlockBelow = computed<TimeBlockWithActivity | undefined>(() => {
+  return timeBlocks.value.find((timeBlock) => {
+    const ghostEndDate = timeScale.value.invert(
+      targetGhostY.value + targetGhostHeight.value - 1,
+    );
+    return isWithinInterval(ghostEndDate, {
+      start: new Date(timeBlock.start),
+      end: getTimeBlockEnd(timeBlock),
+    });
+  });
+});
+
+const isCollisionWithTimeBlockBelow = computed(() => {
+  const res = timeBlocks.value.some((timeBlock) => {
+    const ghostEndDate = timeScale.value.invert(
+      targetGhostY.value + targetGhostHeight.value - 1,
+    );
+    return isWithinInterval(ghostEndDate, {
+      start: new Date(timeBlock.start),
+      end: getTimeBlockEnd(timeBlock),
+    });
+  });
+  console.log("isCollisionWithTimeBlockBelow", res);
+  return res;
+});
 
 const newTimeBlockGhost = computed(() => {
-  // console.log(
-  //   "pointerPosition",
-  //   timeScale.value.invert(pointerPosition.y.value),
-  // );
   return {
     y: ghostY.value,
     height: ghostHeight.value,
@@ -172,20 +152,62 @@ const pointer = usePointer({
   target: container,
 });
 
-watchThrottled(pointer.y, () => {
-  updateGhost();
+// watch ghostTime
+watchThrottled(pointer.y, (newVal, oldVal) => {
+  // const newValPosition = timeScale.value(newVal);
+  // const oldValPosition = timeScale.value(oldVal);
+  // const isMovingDown = newVal > oldVal;
+  // const isMovingUp = newValPosition > oldValPosition;
+
+  // if (!isMovingDown) {
+  //   return;
+  // }
+
+  // if (isMovingDown) {
+  //   console.log("isMovingDown", isMovingDown);
+  // }
+  //
+  // if (isMovingDown && isCollisionWithTimeBlockBelow.value) {
+  //   return;
+  // }
+  updateGhost(newVal, oldVal);
 });
 
-const updateGhost = () => {
+const updateGhost = (newVal, oldVal) => {
+  const isMovingDown = newVal > oldVal;
   console.log("updateGhost");
-  ghostTime.value = roundToNearest15Minutes(
-    timeScale.value.invert(
-      pointer.y.value + container.value.scrollTop - navHeight - 40,
-    ),
-  );
-  ghostY.value = calculateGhostY();
+  // if colliding with a time block below
 
-  ghostHeight.value = calculateGhostHeight();
+  if (collisionBlockBelow.value) {
+    ghostTime.value = new Date(
+      new Date(collisionBlockBelow.value.start).getTime() - hoursToMs(1),
+    );
+    ghostY.value = timeScale.value(ghostTime.value);
+    ghostHeight.value = targetGhostHeight.value;
+
+    ghostStartLabel.value = ghostTime.value.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    ghostEndLabel.value = timeScale.value
+      .invert(ghostY.value + ghostHeight.value)
+      .toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+    return;
+  }
+
+  // if colliding with a time block above
+
+  // if colliding with time block above and below
+
+  // if not colliding with another time block use target values
+  ghostTime.value = targetGhostTime.value;
+  ghostY.value = targetGhostY.value;
+
+  ghostHeight.value = targetGhostHeight.value;
 
   ghostStartLabel.value = ghostTime.value.toLocaleTimeString([], {
     hour: "2-digit",
@@ -198,15 +220,6 @@ const updateGhost = () => {
       minute: "2-digit",
     });
 };
-// function onPointerOver(e) {
-//   shouldShowNewTimeBlockGhosts.value = true;
-//   const time = roundToNearest15Minutes(
-//     timeScale.value.invert(e.offsetY + e.target.scrollTop),
-//   );
-//   ghostY.value = timeScale.value(time);
-//
-//   console.log("onPointerOver", time);
-// }
 
 function clickGhost() {
   alert("clickGhost");
