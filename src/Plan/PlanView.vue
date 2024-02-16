@@ -3,7 +3,7 @@ import { computed, ref } from "vue";
 import AppHeader from "@/Plan/AppHeader.vue";
 import DayView from "@/Plan/DayView/DayView.vue";
 import TimeBlockActivityModal from "@/Plan/TimeBlockActivityModal.vue";
-import { add, format, sub } from "date-fns";
+import { add, endOfDay, format, startOfDay, sub } from "date-fns";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid";
@@ -11,14 +11,27 @@ import type { BudgetActivityWithActivity, TimeBlock } from "@/types";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { msToHours, msToMinutes } from "../Budget/budgetUtils";
+import { useScroll, useToggle } from "@vueuse/core";
+import { ChartPieIcon } from "@heroicons/vue/24/outline";
+import WeekView from "@/Plan/WeekView/WeekView.vue";
+import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
+import { scaleTime } from "d3";
 
 const timeBlockStore = useTimeBlockStore();
 const budgetPeriodStore = useBudgetPeriodStore();
 const showTimeBlockActivityModal = ref(false);
+const calendarScrollContainer = ref<HTMLElement | null>(null);
+
+const { y: calendarScrollContainerScrollOffset } = useScroll(
+  calendarScrollContainer,
+);
 
 const activityStore = useActivitiesStore();
 
 const currentDay = ref<Date>(new Date());
+
+const showBudgetPeriodSideBar = ref(false);
+const toggleBudgetPeriodSidebar = useToggle(showBudgetPeriodSideBar);
 
 function nextDay() {
   currentDay.value = add(currentDay.value, { days: 1 });
@@ -82,6 +95,17 @@ const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
   }
   return budgetActivityStore.getAllForBudget(budgetId);
 });
+
+const view = ref<"day" | "week">("week");
+
+// date obj to create time scale
+const timeScaleDay = new Date();
+const timeScale = computed(() => {
+  console.log("timeScale", [startOfDay(timeScaleDay), endOfDay(timeScaleDay)]);
+  return scaleTime()
+    .domain([startOfDay(timeScaleDay), endOfDay(timeScaleDay)])
+    .range([0, 2800]);
+});
 </script>
 
 <template>
@@ -109,7 +133,16 @@ const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
           {{ format(currentDay, "eeee") }}
         </p>
       </template>
-      <div class="flex items-center">
+      <div class="flex space-x-2 items-center">
+        <select
+          id="view"
+          v-model="view"
+          name="view"
+          class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+        >
+          <option value="day">Day</option>
+          <option value="week">Week</option>
+        </select>
         <div
           class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch"
         >
@@ -146,16 +179,44 @@ const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
       >
         Add timeblock
       </button>
+      <button
+        type="button"
+        class="btn btn-sm btn-ghost"
+        @click="toggleBudgetPeriodSidebar()"
+      >
+        <ChartPieIcon class="h-6 w-6" />
+      </button>
     </AppHeader>
-    <div class="isolate flex flex-auto overflow-hidden bg-white">
+    <div
+      ref="calendarScrollContainer"
+      class="isolate h-full flex flex-auto overflow-auto bg-white"
+    >
+      <!--      <HourDividerLines-->
+      <!--        class="pointer-events-none"-->
+      <!--        :day="timeScaleDay"-->
+      <!--        :time-scale="timeScale"-->
+      <!--      >-->
+      <!--        <template #offset>-->
+      <!--          <div ref="containerOffset" class="row-end-1 h-7"></div>-->
+      <!--        </template>-->
+      <!--      </HourDividerLines>-->
       <DayView
+        v-if="view === 'day'"
         :day="currentDay"
+        :scroll-pos="calendarScrollContainerScrollOffset"
         @editTimeBlock="showEditTimeBlockModal"
         @timeline-clicked="createTimeBlockAtTime"
         @createTimeBloclGhostClicked="createTimeBlockFromGhost"
       />
+      <WeekView
+        v-if="view === 'week'"
+        :scroll-pos="calendarScrollContainerScrollOffset"
+        @createTimeBloclGhostClicked="createTimeBlockFromGhost"
+        @editTimeBlock="showEditTimeBlockModal"
+      />
+
       <div
-        v-if="budgetPeriodStore.activePeriod"
+        v-if="budgetPeriodStore.activePeriod && showBudgetPeriodSideBar"
         class="border-l p-4 border-gray-100 w-0 md:w-[400px]"
       >
         <h3 class="text-2xl flex items-center">

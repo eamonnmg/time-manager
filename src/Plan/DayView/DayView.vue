@@ -6,21 +6,18 @@ import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";
 import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
-import {
-  useDebounceFn,
-  useElementSize,
-  usePointer,
-  useRafFn,
-  useThrottleFn,
-  watchThrottled,
-} from "@vueuse/core";
+import { usePointer, watchThrottled } from "@vueuse/core";
 import { hoursToMs, msToHours, msToMinutes } from "@/Budget/budgetUtils";
 
 interface Props {
   day: Date;
+  showTimesInMargin?: boolean;
+  scrollPos: number;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showTimesInMargin: true,
+});
 const emit = defineEmits([
   "editTimeBlock",
   "timelineClicked",
@@ -32,6 +29,7 @@ const containerOffset = ref(null);
 const nowLine = ref(null);
 const timeBlockStore = useTimeBlockStore();
 const navHeight = 81;
+const dayHeightPx = 2800;
 
 const timeBlocks = computed<TimeBlockWithActivity[]>(() => {
   return timeBlockStore.timeBlocksWithActivityForDay(props.day);
@@ -45,12 +43,12 @@ const timeScale = computed(() => {
   console.log("timeScale", [startOfDay(props.day), endOfDay(props.day)]);
   return scaleTime()
     .domain([startOfDay(props.day), endOfDay(props.day)])
-    .range([0, 2800]);
+    .range([0, dayHeightPx]);
 });
 
 //create timeblock at position
 function onTimelineClick(e) {
-  const time = timeScale.value.invert(e.offsetY + e.target.scrollTop);
+  const time = timeScale.value.invert(e.offsetY + props.scrollPos);
 
   emit("timelineClicked", time);
   // timeBlockStore.add(timeBlock);
@@ -97,10 +95,7 @@ const targetGhostTime = computed(() => {
     timeScale.value(new Date(new Date().getTime() - hoursToMs(1)));
   const time = roundToNearest15Minutes(
     timeScale.value.invert(
-      pointer.y.value +
-        container.value.scrollTop -
-        navHeight -
-        ghostPxHeight / 2,
+      pointer.y.value + props.scrollPos - navHeight - ghostPxHeight / 2,
     ),
   );
 
@@ -120,7 +115,7 @@ const targetGhostHeight = computed(function calculateGhostHeight() {
 
 const isHoveringTimeBlock = computed(() => {
   const pointerYDate = timeScale.value.invert(
-    pointer.y.value + container.value.scrollTop - navHeight,
+    pointer.y.value + props.scrollPos - navHeight,
   );
   const res = timeBlocks.value.some((timeBlock) => {
     return isWithinInterval(pointerYDate, {
@@ -134,7 +129,7 @@ const isHoveringTimeBlock = computed(() => {
 
 const nearestTimeBlockAbovePointer = computed(() => {
   const pointerYDate = timeScale.value.invert(
-    pointer.y.value + container.value.scrollTop - navHeight,
+    pointer.y.value + props.scrollPos - navHeight,
   );
   const timeBlockAbove = timeBlocks.value
     .slice()
@@ -155,7 +150,7 @@ const nearestTimeBlockAbovePointer = computed(() => {
 
 const nearestTimeBlockBelowPointer = computed(() => {
   const pointerYDate = timeScale.value.invert(
-    pointer.y.value + container.value.scrollTop - navHeight,
+    pointer.y.value + props.scrollPos - navHeight,
   );
   const timeBlockBelow = timeBlocks.value
     .slice()
@@ -272,14 +267,11 @@ function calcDurationLable(duration: number) {
 }
 
 // watch ghostTime
-watchThrottled(pointer.y, (newVal, oldVal) => {
-  updateGhost(newVal, oldVal);
+watchThrottled(pointer.y, () => {
+  updateGhost();
 });
 
-const updateGhost = (newVal, oldVal) => {
-  const isMovingDown = newVal > oldVal;
-  console.log("updateGhost");
-
+const updateGhost = () => {
   // if colliding with time block above and below
   // i.e. stuck between two time blocks
   // then the ghost time block should fill the space
@@ -336,11 +328,17 @@ function clickGhost() {
 <template>
   <div
     ref="container"
-    class="flex test flex-auto flex-col overflow-auto"
+    class="flex test h-full flex-auto flex-col"
+    :style="`height: ${dayHeightPx}px`"
     @click="onTimelineClick"
   >
     <div class="flex w-full flex-auto">
-      <div class="w-14 flex-none bg-white ring-1 ring-gray-100" />
+      <div
+        class="flex-none bg-white"
+        :class="{
+          'w-14': showTimesInMargin,
+        }"
+      />
       <!--      <div class="grid flex-auto grid-cols-1 grid-rows-1">-->
       <!-- Horizontal lines -->
 
@@ -349,6 +347,7 @@ function clickGhost() {
           class="pointer-events-none"
           :day="day"
           :time-scale="timeScale"
+          :show-times="showTimesInMargin"
         >
           <template #offset>
             <div ref="containerOffset" class="row-end-1 h-7"></div>
