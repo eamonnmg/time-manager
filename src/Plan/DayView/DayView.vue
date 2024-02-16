@@ -133,6 +133,7 @@ const nearestTimeBlockAbovePointer = computed(() => {
     pointer.y.value + container.value.scrollTop - navHeight,
   );
   const timeBlockAbove = timeBlocks.value
+    .slice()
     .sort((tb1, tb2) => {
       return new Date(tb2.start) - new Date(tb1.start);
     })
@@ -153,6 +154,7 @@ const nearestTimeBlockBelowPointer = computed(() => {
     pointer.y.value + container.value.scrollTop - navHeight,
   );
   const timeBlockBelow = timeBlocks.value
+    .slice()
     .sort((tb1, tb2) => {
       return new Date(tb1.start) - new Date(tb2.start);
     })
@@ -385,7 +387,7 @@ function clickGhost() {
         </div>
         <!--        debug ghost-->
         <div
-          v-show="shouldShowNewTimeBlockGhosts"
+          v-show="false"
           ref="createTimeBlockGhost"
           class="absolute opacity-70 z-50 transition-transform duration-100 left-0 w-full right-0 top-0 bottom-0 mt-px flex"
           :style="{
