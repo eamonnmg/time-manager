@@ -139,10 +139,10 @@ function saveNewActivity() {
         class="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
       >
         <ComboboxOption
-          v-for="department in filteredActivities"
-          :key="department.id"
+          v-for="activity in filteredActivities"
+          :key="activity.id"
           v-slot="{ active, selected }"
-          :value="department"
+          :value="activity"
           as="template"
         >
           <li
@@ -153,13 +153,11 @@ function saveNewActivity() {
           >
             <div class="flex items-center">
               <div
-                :class="[
-                  'badge h-6 w-6 flex-shrink-0 rounded-full',
-                  department.color,
-                ]"
+                class="badge h-6 w-6 flex-shrink-0 rounded-full"
+                :style="{ backgroundColor: activity.color }"
               />
               <span :class="['ml-3 truncate', selected && 'font-semibold']">
-                {{ department.name }}
+                {{ activity.name }}
               </span>
             </div>
 

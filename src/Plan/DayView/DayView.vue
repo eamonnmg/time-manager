@@ -4,10 +4,11 @@ import type { TimeBlockWithActivity } from "@/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";
-import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
+import { endOfDay, format, isWithinInterval, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { usePointer, watchThrottled } from "@vueuse/core";
 import { hoursToMs, msToHours, msToMinutes } from "@/Budget/budgetUtils";
+import { da } from "date-fns/locale";
 
 interface Props {
   day: Date;
@@ -332,6 +333,13 @@ function clickGhost() {
     :style="`height: ${dayHeightPx}px`"
     @click="onTimelineClick"
   >
+    <div
+      class="sticky flex justify-center border-b border-gray-100 top-0 bg-white z-10"
+    >
+      <time>
+        {{ format(day, "EEEE") }}
+      </time>
+    </div>
     <div class="flex w-full flex-auto">
       <div
         class="flex-none bg-white"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DayView from "@/Plan/DayView/DayView.vue";
-import { addDays, eachDayOfInterval } from "date-fns";
+import { addDays, eachDayOfInterval, lastDayOfWeek, subDays } from "date-fns";
 
 interface Props {
   scrollPos: number;
@@ -8,9 +8,10 @@ interface Props {
 
 defineProps<Props>();
 
+const lastDay = lastDayOfWeek(new Date());
 const week = eachDayOfInterval({
-  start: new Date(),
-  end: addDays(new Date(), 6),
+  start: subDays(lastDay, 6),
+  end: lastDay,
 });
 </script>
 
