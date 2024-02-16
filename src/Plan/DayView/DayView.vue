@@ -363,12 +363,14 @@ function clickGhost() {
           }"
         ></div>
 
-        <TimeBlocks :time-blocks="timeBlocks" :time-scale="timeScale" />
+        <TimeBlocks
+          :time-blocks="timeBlocks"
+          :time-scale="timeScale"
+          @edit-time-block="$emit('editTimeBlock', $event)"
+        />
         <div
           v-show="shouldShowNewTimeBlockGhosts"
-          :class="[
-            'absolute  transition-transform duration-100  left-0 z-50 w-full right-0 top-0 bottom-0 mt-px flex',
-          ]"
+          class="absolute cursor-pointer transition-transform duration-100 left-0 z-50 w-full right-0 top-0 bottom-0 mt-px flex"
           :style="{
             height: `${newTimeBlockGhost.height}px`,
             transform: `translateY(${newTimeBlockGhost.y}px)`,
@@ -380,9 +382,7 @@ function clickGhost() {
           >
             <div class="flex justify-between w-full h-full">
               <div class="flex-col flex">
-                <p class="order-1 font-semibold">
-                  Click to create new time block
-                </p>
+                <p class="font-semibold">Click to create new time block</p>
                 <p class="">
                   <time datetime="2022-01-22T06:00"
                     >{{ newTimeBlockGhost.startTimeLabel }} -
