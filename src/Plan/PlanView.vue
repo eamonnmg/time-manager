@@ -11,7 +11,7 @@ import type { BudgetActivityWithActivity, TimeBlock } from "@/types";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { msToHours, msToMinutes } from "../Budget/budgetUtils";
-import { useScroll, useToggle } from "@vueuse/core";
+import { useScroll, useToggle, type VueInstance } from "@vueuse/core";
 import { ChartPieIcon } from "@heroicons/vue/24/outline";
 import WeekView from "@/Plan/WeekView/WeekView.vue";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
@@ -22,9 +22,23 @@ const budgetPeriodStore = useBudgetPeriodStore();
 const showTimeBlockActivityModal = ref(false);
 const calendarScrollContainer = ref<HTMLElement | null>(null);
 
+const navContainer = ref<VueInstance | null>(null);
+
 const { y: calendarScrollContainerScrollOffset } = useScroll(
   calendarScrollContainer,
 );
+
+const scrollOffset = computed(() => {
+  if (!navContainer.value) {
+    return 0;
+  }
+  const unexplainedOffset = 25;
+  return (
+    calendarScrollContainerScrollOffset.value -
+    navContainer.value.$el.offsetHeight -
+    unexplainedOffset
+  );
+});
 
 const activityStore = useActivitiesStore();
 
@@ -96,7 +110,7 @@ const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
   return budgetActivityStore.getAllForBudget(budgetId);
 });
 
-const view = ref<"day" | "week">("week");
+const view = ref<"day" | "week">("day");
 
 // date obj to create time scale
 const timeScaleDay = new Date();
@@ -119,7 +133,7 @@ const timeScale = computed(() => {
     @remove-time-block="removeTimeBlock"
   />
   <div class="flex h-full w-full flex-col">
-    <AppHeader>
+    <AppHeader ref="navContainer">
       <template #left>
         <h1 class="text-base font-semibold leading-6 text-gray-900">
           <time datetime="2022-01-22" class="sm:hidden">
@@ -189,7 +203,7 @@ const timeScale = computed(() => {
     </AppHeader>
     <div
       ref="calendarScrollContainer"
-      class="isolate h-full flex flex-auto overflow-auto bg-white"
+      class="h-full flex flex-auto overflow-auto bg-white"
     >
       <!--      <HourDividerLines-->
       <!--        class="pointer-events-none"-->
@@ -203,21 +217,21 @@ const timeScale = computed(() => {
       <DayView
         v-if="view === 'day'"
         :day="currentDay"
-        :scroll-pos="calendarScrollContainerScrollOffset"
+        :scroll-pos="scrollOffset"
         @editTimeBlock="showEditTimeBlockModal"
         @timeline-clicked="createTimeBlockAtTime"
         @createTimeBloclGhostClicked="createTimeBlockFromGhost"
       />
       <WeekView
         v-if="view === 'week'"
-        :scroll-pos="calendarScrollContainerScrollOffset"
+        :scroll-pos="scrollOffset"
         @createTimeBloclGhostClicked="createTimeBlockFromGhost"
         @editTimeBlock="showEditTimeBlockModal"
       />
 
       <div
         v-if="budgetPeriodStore.activePeriod && showBudgetPeriodSideBar"
-        class="border-l p-4 border-gray-100 w-0 md:w-[400px]"
+        class="sticky top-0 border-l p-4 overflow-auto border-gray-100 w-0 md:w-[400px]"
       >
         <h3 class="text-2xl flex items-center">
           Active Budget

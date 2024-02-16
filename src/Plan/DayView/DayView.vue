@@ -37,7 +37,11 @@ const timeBlocks = computed<TimeBlockWithActivity[]>(() => {
 });
 
 onMounted(() => {
-  nowLine.value.scrollIntoView({ block: "center" });
+  if (nowLine.value) {
+    setTimeout(() => {
+      nowLine.value.scrollIntoView({ block: "center" });
+    }, 200);
+  }
 });
 
 const timeScale = computed(() => {
@@ -96,7 +100,7 @@ const targetGhostTime = computed(() => {
     timeScale.value(new Date(new Date().getTime() - hoursToMs(1)));
   const time = roundToNearest15Minutes(
     timeScale.value.invert(
-      pointer.y.value + props.scrollPos - navHeight - ghostPxHeight / 2,
+      pointer.y.value + props.scrollPos - ghostPxHeight / 2,
     ),
   );
 
@@ -116,7 +120,7 @@ const targetGhostHeight = computed(function calculateGhostHeight() {
 
 const isHoveringTimeBlock = computed(() => {
   const pointerYDate = timeScale.value.invert(
-    pointer.y.value + props.scrollPos - navHeight,
+    pointer.y.value + props.scrollPos,
   );
   const res = timeBlocks.value.some((timeBlock) => {
     return isWithinInterval(pointerYDate, {
@@ -130,7 +134,7 @@ const isHoveringTimeBlock = computed(() => {
 
 const nearestTimeBlockAbovePointer = computed(() => {
   const pointerYDate = timeScale.value.invert(
-    pointer.y.value + props.scrollPos - navHeight,
+    pointer.y.value + props.scrollPos,
   );
   const timeBlockAbove = timeBlocks.value
     .slice()
@@ -151,7 +155,7 @@ const nearestTimeBlockAbovePointer = computed(() => {
 
 const nearestTimeBlockBelowPointer = computed(() => {
   const pointerYDate = timeScale.value.invert(
-    pointer.y.value + props.scrollPos - navHeight,
+    pointer.y.value + props.scrollPos,
   );
   const timeBlockBelow = timeBlocks.value
     .slice()
@@ -272,6 +276,10 @@ watchThrottled(pointer.y, () => {
   updateGhost();
 });
 
+const pointerPos = computed(() => {
+  return pointer.y.value + props.scrollPos;
+});
+
 const updateGhost = () => {
   // if colliding with time block above and below
   // i.e. stuck between two time blocks
@@ -362,11 +370,26 @@ function clickGhost() {
           </template>
         </HourDividerLines>
 
+        <!--        only show if is within view-->
         <div
+          v-if="
+            timeScale(new Date()) < dayHeightPx && timeScale(new Date()) > 0
+          "
           ref="nowLine"
+          data-now-line
           class="absolute pointer-events-none z-10 h-[1px] w-full bg-red-500"
           :style="{
             transform: `translateY(${timeScale(new Date())}px)`,
+          }"
+        ></div>
+
+        <!--        debug pointer position line-->
+        <div
+          v-if="false"
+          data-pointer-line
+          class="absolute pointer-events-none z-[100] h-[1px] w-full bg-blue-500"
+          :style="{
+            transform: `translateY(${pointerPos}px)`,
           }"
         ></div>
 
