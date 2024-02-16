@@ -14,7 +14,7 @@ import {
   useThrottleFn,
   watchThrottled,
 } from "@vueuse/core";
-import { hoursToMs } from "@/Budget/budgetUtils";
+import { hoursToMs, msToHours, msToMinutes } from "@/Budget/budgetUtils";
 
 interface Props {
   day: Date;
@@ -177,16 +177,6 @@ const nearestTimeBlockBelowPointer = computed(() => {
 // find distance between nearest timeblocks above and below the pointer y position
 // and determine if ghost can fit between them
 const canTargetGhostFitBetweenTimeBlocks = computed(() => {
-  // const pointerYDate = timeScale.value.invert(
-  //   pointer.y.value + container.value.scrollTop - navHeight,
-  // );
-  // const timeBlockAbove = timeBlocks.value.find((timeBlock) => {
-  //   return pointerYDate > getTimeBlockEnd(timeBlock);
-  // });
-  // const timeBlockBelow = timeBlocks.value.find((timeBlock) => {
-  //   return pointerYDate < new Date(timeBlock.start);
-  // });
-
   if (
     nearestTimeBlockAbovePointer.value &&
     nearestTimeBlockBelowPointer.value
@@ -258,7 +248,7 @@ const newTimeBlockGhost = computed(() => {
     height: ghostHeight.value,
     startTimeLabel: ghostStartLabel.value,
     endTimeLabel: ghostEndLabel.value,
-    durationLabel: "1 hr",
+    durationLabel: calcDurationLable(ghostDurationMs.value),
     duration: ghostDurationMs.value,
     time: ghostTime.value,
   };
@@ -271,6 +261,15 @@ const shouldShowNewTimeBlockGhosts = computed(() => {
 const pointer = usePointer({
   target: container,
 });
+
+function calcDurationLable(duration: number) {
+  const mins = msToMinutes(duration);
+  if (mins > 60) {
+    return `${msToHours(duration)} hrs`;
+  }
+
+  return `${mins} mins`;
+}
 
 // watch ghostTime
 watchThrottled(pointer.y, (newVal, oldVal) => {
