@@ -21,7 +21,11 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(["editTimeBlock", "timelineClicked"]);
+const emit = defineEmits([
+  "editTimeBlock",
+  "timelineClicked",
+  "createTimeBloclGhostClicked",
+]);
 
 const container = ref(null);
 const containerOffset = ref(null);
@@ -241,6 +245,13 @@ const collisionBlockAbove = computed<TimeBlockWithActivity | undefined>(() => {
   });
 });
 
+const ghostDurationMs = computed<number>(() => {
+  return (
+    timeScale.value.invert(ghostY.value + ghostHeight.value).getTime() -
+    ghostTime.value.getTime()
+  );
+});
+
 const newTimeBlockGhost = computed(() => {
   return {
     y: ghostY.value,
@@ -248,6 +259,8 @@ const newTimeBlockGhost = computed(() => {
     startTimeLabel: ghostStartLabel.value,
     endTimeLabel: ghostEndLabel.value,
     durationLabel: "1 hr",
+    duration: ghostDurationMs.value,
+    time: ghostTime.value,
   };
 });
 
@@ -317,7 +330,7 @@ const updateGhost = (newVal, oldVal) => {
 };
 
 function clickGhost() {
-  alert("clickGhost");
+  emit("createTimeBloclGhostClicked", newTimeBlockGhost.value);
 }
 </script>
 
@@ -387,7 +400,7 @@ function clickGhost() {
         </div>
         <!--        debug ghost-->
         <div
-          v-show="false"
+          v-if="false"
           ref="createTimeBlockGhost"
           class="absolute opacity-70 z-50 transition-transform duration-100 left-0 w-full right-0 top-0 bottom-0 mt-px flex"
           :style="{

@@ -10,7 +10,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid";
 import type { BudgetActivityWithActivity, TimeBlock } from "@/types";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
-import { msToHours } from "../Budget/budgetUtils";
+import { msToHours, msToMinutes } from "../Budget/budgetUtils";
 
 const timeBlockStore = useTimeBlockStore();
 const budgetPeriodStore = useBudgetPeriodStore();
@@ -49,6 +49,16 @@ function createTimeBlockAtTime(time: Date) {
   selectedTimeBlock.value = {
     start: roundToNearest15Minutes(time),
     duration: 60 * 60 * 1000,
+    activityId: "",
+    color: "",
+  };
+}
+
+function createTimeBlockFromGhost(ghost) {
+  showTimeBlockActivityModal.value = true;
+  selectedTimeBlock.value = {
+    start: ghost.time,
+    duration: ghost.duration,
     activityId: "",
     color: "",
   };
@@ -142,6 +152,7 @@ const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
         :day="currentDay"
         @editTimeBlock="showEditTimeBlockModal"
         @timeline-clicked="createTimeBlockAtTime"
+        @createTimeBloclGhostClicked="createTimeBlockFromGhost"
       />
       <div
         v-if="budgetPeriodStore.activePeriod"

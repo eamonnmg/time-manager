@@ -40,6 +40,10 @@ if (props.timeBlock && props.timeBlock.start) {
   start.value = new Date(props.timeBlock.start).toISOString().slice(0, 19);
 }
 
+if (props.timeBlock && props.timeBlock.duration) {
+  duration.value = props.timeBlock.duration;
+}
+
 if (editMode.value) {
   activity.value = activityStore.getById(props.timeBlock.activityId);
   start.value = new Date(props.timeBlock.start).toISOString().slice(0, 19);
