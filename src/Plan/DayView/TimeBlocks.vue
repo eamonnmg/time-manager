@@ -85,8 +85,9 @@ function calcIdealTextColor(color: string) {
   if (!color) return "#000";
   // chroma throws error if color is not valid
   try {
+    // use white text if contrast acceptable
     const contrast = chroma.contrast("#fff", color);
-    return Math.abs(4.5 - contrast) < 2 ? "white" : "black";
+    return contrast - 4.5 >= 0 ? "white" : "black";
   } catch {
     return "black";
   }
