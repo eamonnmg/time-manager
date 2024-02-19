@@ -3,7 +3,16 @@ import { computed, ref } from "vue";
 import AppHeader from "@/Plan/AppHeader.vue";
 import DayView from "@/Plan/DayView/DayView.vue";
 import TimeBlockActivityModal from "@/Plan/TimeBlockActivityModal.vue";
-import { add, endOfDay, format, startOfDay, sub } from "date-fns";
+import {
+  add,
+  eachDayOfInterval,
+  endOfDay,
+  format,
+  lastDayOfWeek,
+  startOfDay,
+  sub,
+  subDays,
+} from "date-fns";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid";
@@ -44,6 +53,10 @@ const activityStore = useActivitiesStore();
 
 const currentDay = ref<Date>(new Date());
 
+const lastDayOfCurrentWeek = computed(() => {
+  return lastDayOfWeek(currentDay.value);
+});
+
 const showBudgetPeriodSideBar = ref(false);
 const toggleBudgetPeriodSidebar = useToggle(showBudgetPeriodSideBar);
 
@@ -53,6 +66,14 @@ function nextDay() {
 
 function previousDay() {
   currentDay.value = sub(currentDay.value, { days: 1 });
+}
+
+function nextWeek() {
+  currentDay.value = add(currentDay.value, { weeks: 1 });
+}
+
+function previousWeek() {
+  currentDay.value = sub(currentDay.value, { weeks: 1 });
 }
 
 function resetDay() {
@@ -143,7 +164,7 @@ const timeScale = computed(() => {
             >{{ format(currentDay, "MMMM d, yyyy") }}
           </time>
         </h1>
-        <p class="mt-1 text-sm text-gray-500">
+        <p v-if="view === 'day'" class="mt-1 text-sm text-gray-500">
           {{ format(currentDay, "eeee") }}
         </p>
       </template>
@@ -158,6 +179,7 @@ const timeScale = computed(() => {
           <option value="week">Week</option>
         </select>
         <div
+          v-if="view === 'day'"
           class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch"
         >
           <button
@@ -185,6 +207,35 @@ const timeScale = computed(() => {
             <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
+        <div
+          v-if="view === 'week'"
+          class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch"
+        >
+          <button
+            type="button"
+            class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"
+            @click="previousWeek"
+          >
+            <span class="sr-only">Previous week</span>
+            <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="hidden border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block"
+            @click="resetDay"
+          >
+            This week
+          </button>
+          <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden" />
+          <button
+            type="button"
+            class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50"
+            @click="nextWeek"
+          >
+            <span class="sr-only">Next week</span>
+            <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
       <button
         type="button"
@@ -194,6 +245,7 @@ const timeScale = computed(() => {
         Add timeblock
       </button>
       <button
+        v-if="budgetPeriodStore.activePeriod && showBudgetPeriodSideBar"
         type="button"
         class="btn btn-sm btn-ghost"
         @click="toggleBudgetPeriodSidebar()"
@@ -225,6 +277,7 @@ const timeScale = computed(() => {
       <WeekView
         v-if="view === 'week'"
         :scroll-pos="scrollOffset"
+        :last-day-of-week="lastDayOfCurrentWeek"
         @createTimeBloclGhostClicked="createTimeBlockFromGhost"
         @editTimeBlock="showEditTimeBlockModal"
       />

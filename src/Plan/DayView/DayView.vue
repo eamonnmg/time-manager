@@ -342,7 +342,7 @@ function clickGhost() {
     @click="onTimelineClick"
   >
     <div
-      class="sticky flex justify-center border-b border-gray-100 top-0 bg-white z-10"
+      class="sticky flex z-50 justify-center border-b border-gray-100 top-0 bg-white z-10"
     >
       <time>
         {{ format(day, "EEEE") }}
@@ -400,7 +400,7 @@ function clickGhost() {
         />
         <div
           v-show="shouldShowNewTimeBlockGhosts"
-          class="absolute cursor-pointer transition-transform duration-100 left-0 z-50 w-full right-0 top-0 bottom-0 mt-px flex"
+          class="absolute cursor-pointer transition-transform duration-100 left-0 z-40 w-full right-0 top-0 bottom-0 mt-px flex"
           :style="{
             height: `${newTimeBlockGhost.height}px`,
             transform: `translateY(${newTimeBlockGhost.y}px)`,
