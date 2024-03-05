@@ -38,20 +38,28 @@ const timeBlockViewObjs = computed<TimeBlockViewObj[]>(() => {
 function timeBlockToDayViewTimeBlock(
   timeBlock: TimeBlockWithActivity,
 ): TimeBlockViewObj {
-  console.log(props.timeScale(new Date()));
-
   function calcHeight() {
     let height =
       props.timeScale(
         new Date(new Date(timeBlock.start).getTime() + timeBlock.duration),
       ) - props.timeScale(new Date(timeBlock.start));
 
-    // cut off height if exceeds container
+    // cut off height if exceeds container. eg start time is 23:30 and goes on into the A.M.
     if (height + props.timeScale(new Date(timeBlock.start)) > 2800) {
       height = 2800 - props.timeScale(new Date(timeBlock.start));
     }
 
+    // if timeblocks starts yesterday, then subtract the overflowing y from height
+    if (props.timeScale(new Date(timeBlock.start)) < 0) {
+      height = height + props.timeScale(new Date(timeBlock.start));
+    }
+
     return height;
+  }
+
+  function calcY() {
+    const y = props.timeScale(new Date(timeBlock.start));
+    return y < 0 ? 0 : y;
   }
 
   function calcDurationLable() {
@@ -65,7 +73,7 @@ function timeBlockToDayViewTimeBlock(
 
   return {
     ...timeBlock,
-    y: props.timeScale(new Date(timeBlock.start)),
+    y: calcY(),
     height: calcHeight(),
     startTimeLabel: new Date(timeBlock.start).toLocaleTimeString([], {
       hour: "2-digit",

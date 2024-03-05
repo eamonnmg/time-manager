@@ -95,6 +95,10 @@ const targetGhostTime = computed(() => {
     return new Date();
   }
 
+  if (isPointerDown.value) {
+    return targetGhostTime.value;
+  }
+
   const ghostPxHeight =
     timeScale.value(new Date()) -
     timeScale.value(new Date(new Date().getTime() - hoursToMs(1)));
@@ -114,6 +118,19 @@ const targetGhostHeight = computed(function calculateGhostHeight() {
   const height =
     timeScale.value(new Date(targetGhostTime.value.getTime() + hoursToMs(1))) -
     timeScale.value(targetGhostTime.value);
+
+  if (isPointerDown.value) {
+    const pointerTimeDelta =
+      roundToNearest15Minutes(
+        timeScale.value.invert(pointerPos.value),
+      ).getTime() - roundToNearest15Minutes(targetGhostTime.value).getTime();
+    console.log("delta", pointerTimeDelta);
+    return (
+      timeScale.value(
+        new Date(targetGhostTime.value.getTime() + pointerTimeDelta),
+      ) - timeScale.value(targetGhostTime.value)
+    );
+  }
 
   return height;
 });
@@ -261,6 +278,8 @@ const shouldShowNewTimeBlockGhosts = computed(() => {
 const pointer = usePointer({
   target: container,
 });
+
+const isPointerDown = computed(() => pointer.pressure.value > 0);
 
 function calcDurationLable(duration: number) {
   const mins = msToMinutes(duration);

@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import type { ModelId, TimeBlock } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
+import { getTimeBlockEnd } from "@/Budget/budgetUtils";
 
 export const useTimeBlockStore = defineStore(
   "timeBlocks",
@@ -22,12 +23,15 @@ export const useTimeBlockStore = defineStore(
     const timeBlocksWithActivityForDay = computed(() => {
       return (day: Date) => {
         return timeBlocksWithActivity.value.filter((tb: TimeBlock) => {
-          const x = isWithinInterval(new Date(tb.start), {
+          const isStartWithDay = isWithinInterval(new Date(tb.start), {
             start: startOfDay(day),
             end: endOfDay(day),
           });
-          console.log("test", x);
-          return x;
+          const isEndWithDay = isWithinInterval(getTimeBlockEnd(tb), {
+            start: startOfDay(day),
+            end: endOfDay(day),
+          });
+          return isStartWithDay || isEndWithDay;
         });
       };
     });

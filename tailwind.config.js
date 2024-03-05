@@ -5,4 +5,8 @@ module.exports = {
     extend: {},
   },
   plugins: [require("@tailwindcss/forms"), require("daisyui")],
+  daisyui: {
+    // just light mode for now
+    themes: ["light"], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
+  },
 };

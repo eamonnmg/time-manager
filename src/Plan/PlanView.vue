@@ -20,7 +20,12 @@ import type { BudgetActivityWithActivity, TimeBlock } from "@/types";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { msToHours, msToMinutes } from "../Budget/budgetUtils";
-import { useScroll, useToggle, type VueInstance } from "@vueuse/core";
+import {
+  useLocalStorage,
+  useScroll,
+  useToggle,
+  type VueInstance,
+} from "@vueuse/core";
 import { ChartPieIcon } from "@heroicons/vue/24/outline";
 import WeekView from "@/Plan/WeekView/WeekView.vue";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
@@ -131,8 +136,7 @@ const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
   return budgetActivityStore.getAllForBudget(budgetId);
 });
 
-const view = ref<"day" | "week">("day");
-
+const view = useLocalStorage<"day" | "week">("plan-view", "week");
 // date obj to create time scale
 const timeScaleDay = new Date();
 const timeScale = computed(() => {
@@ -157,27 +161,40 @@ const timeScale = computed(() => {
     <AppHeader ref="navContainer">
       <template #left>
         <h1 class="text-base font-semibold leading-6 text-gray-900">
-          <time datetime="2022-01-22" class="sm:hidden">
+          <time datetime="2022-01-22">
             {{ format(currentDay, "MMM d, yyyy") }}
-          </time>
-          <time datetime="2022-01-22" class="hidden sm:inline"
-            >{{ format(currentDay, "MMMM d, yyyy") }}
+            <span v-if="view === 'week'">
+              - {{ format(lastDayOfCurrentWeek, "MMM d, yyyy") }}</span
+            >
           </time>
         </h1>
-        <p v-if="view === 'day'" class="mt-1 text-sm text-gray-500">
-          {{ format(currentDay, "eeee") }}
+        <p class="mt-1 h-6 text-sm text-gray-500">
+          <span v-if="view === 'day'"> {{ format(currentDay, "eeee") }}</span>
+          <span v-if="view === 'week'"> Sunday - Saturday</span>
         </p>
       </template>
       <div class="flex space-x-2 items-center">
-        <select
-          id="view"
-          v-model="view"
-          name="view"
-          class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-        >
-          <option value="day">Day</option>
-          <option value="week">Week</option>
-        </select>
+        <div class="join">
+          <input
+            id="day"
+            v-model="view"
+            name="view"
+            class="join-item btn !bg-none btn-sm w-14"
+            type="radio"
+            value="day"
+            aria-label="Day"
+          />
+          <input
+            id="week"
+            v-model="view"
+            name="view"
+            class="join-item btn !bg-none btn-sm w-14"
+            type="radio"
+            value="week"
+            aria-label="Week"
+          />
+        </div>
+
         <div
           v-if="view === 'day'"
           class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch"
@@ -224,7 +241,7 @@ const timeScale = computed(() => {
             class="hidden border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block"
             @click="resetDay"
           >
-            This week
+            Today
           </button>
           <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden" />
           <button
@@ -245,7 +262,7 @@ const timeScale = computed(() => {
         Add timeblock
       </button>
       <button
-        v-if="budgetPeriodStore.activePeriod && showBudgetPeriodSideBar"
+        v-if="budgetPeriodStore.activePeriod"
         type="button"
         class="btn btn-sm btn-ghost"
         @click="toggleBudgetPeriodSidebar()"
