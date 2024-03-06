@@ -8,7 +8,11 @@ import { endOfDay, format, isWithinInterval, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { usePointer, watchThrottled } from "@vueuse/core";
 import { hoursToMs, msToHours, msToMinutes } from "@/Budget/budgetUtils";
-import { da } from "date-fns/locale";
+import {
+  getTimeBlockEnd,
+  roundToNearest15Minutes,
+  timeblocksBetweenDates,
+} from "@/Plan/DayView/utils";
 
 interface Props {
   day: Date;
@@ -45,7 +49,7 @@ onMounted(() => {
 });
 
 const timeScale = computed(() => {
-  console.log("timeScale", [startOfDay(props.day), endOfDay(props.day)]);
+  // console.log("timeScale", [startOfDay(props.day), endOfDay(props.day)]);
   return scaleTime()
     .domain([startOfDay(props.day), endOfDay(props.day)])
     .range([0, dayHeightPx]);
@@ -57,15 +61,6 @@ function onTimelineClick(e) {
 
   emit("timelineClicked", time);
   // timeBlockStore.add(timeBlock);
-}
-
-function roundToNearest15Minutes(date) {
-  const minutes = date.getMinutes();
-  const roundedMinutes = Math.round(minutes / 15) * 15;
-  date.setMinutes(roundedMinutes);
-  date.setSeconds(0);
-  date.setMilliseconds(0);
-  return date;
 }
 
 const ghostY = ref(0);
@@ -86,17 +81,15 @@ const ghostEndLabel = computed(() => {
 });
 const ghostHeight = ref(0);
 
-function getTimeBlockEnd(timeBlock) {
-  return new Date(new Date(timeBlock.start).getTime() + timeBlock.duration);
-}
-
 const targetGhostTime = computed(() => {
   if (!container.value) {
     return new Date();
   }
 
+  // if use clicking and dragging then we lock time and extend duration of block
   if (isPointerDown.value) {
-    return targetGhostTime.value;
+    // return targetGhostTime.value;
+    return ghostTime.value;
   }
 
   const ghostPxHeight =
@@ -115,24 +108,29 @@ const targetGhostY = computed(() => {
 });
 
 const targetGhostHeight = computed(function calculateGhostHeight() {
-  const height =
+  let height =
     timeScale.value(new Date(targetGhostTime.value.getTime() + hoursToMs(1))) -
     timeScale.value(targetGhostTime.value);
 
+  // click and drag behavior
   if (isPointerDown.value) {
     const pointerTimeDelta =
       roundToNearest15Minutes(
         timeScale.value.invert(pointerPos.value),
       ).getTime() - roundToNearest15Minutes(targetGhostTime.value).getTime();
     console.log("delta", pointerTimeDelta);
-    return (
+
+    height =
       timeScale.value(
         new Date(targetGhostTime.value.getTime() + pointerTimeDelta),
-      ) - timeScale.value(targetGhostTime.value)
-    );
+      ) - timeScale.value(targetGhostTime.value);
   }
 
   return height;
+});
+
+const targetGhostEndTime = computed(() => {
+  return timeScale.value.invert(targetGhostY.value + targetGhostHeight.value);
 });
 
 const isHoveringTimeBlock = computed(() => {
@@ -213,21 +211,6 @@ const collisionBlockBelow = computed<TimeBlockWithActivity | undefined>(() => {
       targetGhostY.value + targetGhostHeight.value,
     );
 
-    // if (collisionBlockAbove.value) {
-    //   console.log(
-    //     "collisionBlockAbove",
-    //     new Date(
-    //       getTimeBlockEnd(collisionBlockAbove.value).getTime() + hoursToMs(1),
-    //     ),
-    //   );
-    // }
-
-    // const targetGhostEndDate = Boolean(collisionBlockAbove.value)
-    //   ? new Date(
-    //       getTimeBlockEnd(collisionBlockAbove.value).getTime() + hoursToMs(1),
-    //     )
-    //   : timeScale.value.invert(targetGhostY.value + targetGhostHeight.value);
-
     return isWithinInterval(targetGhostEndDate, {
       start: new Date(timeBlock.start),
       end: getTimeBlockEnd(timeBlock),
@@ -238,12 +221,6 @@ const collisionBlockBelow = computed<TimeBlockWithActivity | undefined>(() => {
 const collisionBlockAbove = computed<TimeBlockWithActivity | undefined>(() => {
   return timeBlocks.value.find((timeBlock) => {
     const targetGhostStartDate = timeScale.value.invert(targetGhostY.value);
-
-    // const targetGhostStartDate = Boolean(collisionBlockBelow.value)
-    //   ? new Date(
-    //       new Date(collisionBlockBelow.value.start).getTime() - hoursToMs(1),
-    //     )
-    //   : timeScale.value.invert(targetGhostY.value);
 
     return isWithinInterval(targetGhostStartDate, {
       start: new Date(timeBlock.start),
@@ -272,7 +249,10 @@ const newTimeBlockGhost = computed(() => {
 });
 
 const shouldShowNewTimeBlockGhosts = computed(() => {
-  return pointer.isInside.value && !isHoveringTimeBlock.value;
+  return (
+    pointer.isInside.value &&
+    (!isHoveringTimeBlock.value || isPointerDown.value)
+  );
 });
 
 const pointer = usePointer({
@@ -300,17 +280,35 @@ const pointerPos = computed(() => {
 });
 
 const updateGhost = () => {
+  if (isPointerDown.value) {
+    const overlappedTimeBlocks = timeblocksBetweenDates(
+      targetGhostTime.value,
+      targetGhostEndTime.value,
+      timeBlocks.value,
+    );
+    if (overlappedTimeBlocks.length > 0) {
+      console.log("overlappedTimeBlocks", overlappedTimeBlocks.length);
+      // time always stays the same - ie its lock at where drag started
+      ghostTime.value = ghostTime.value;
+      ghostY.value = ghostY.value;
+      // height must be set to distance from targetGhostY to first timeblock start date inside the target
+      ghostHeight.value =
+        timeScale.value(new Date(overlappedTimeBlocks[0].start)) - ghostY.value;
+      return;
+    }
+
+    ghostTime.value = targetGhostTime.value;
+    ghostY.value = targetGhostY.value;
+    ghostHeight.value = targetGhostHeight.value;
+
+    return;
+  }
+
   // if colliding with time block above and below
   // i.e. stuck between two time blocks
   // then the ghost time block should fill the space
   // if (collisionBlockBelow.value && collisionBlockAbove.value) {
-
-  console.log(
-    "canTargetGhostFitBetweenTimeBlocks",
-    canTargetGhostFitBetweenTimeBlocks.value,
-  );
   if (!canTargetGhostFitBetweenTimeBlocks.value) {
-    // ghostTime.value = getTimeBlockEnd(collisionBlockAbove.value);
     ghostTime.value = getTimeBlockEnd(nearestTimeBlockAbovePointer.value);
     ghostY.value = timeScale.value(ghostTime.value);
     ghostHeight.value =
@@ -321,7 +319,6 @@ const updateGhost = () => {
   }
 
   // if colliding with a time block below
-
   if (collisionBlockBelow.value) {
     ghostTime.value = new Date(
       new Date(collisionBlockBelow.value.start).getTime() - hoursToMs(1),
@@ -459,7 +456,7 @@ function clickGhost() {
           <div
             class="group border bg-white absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5"
           >
-            ghost
+            <!--            target ghost {{ targetGhostEndTime }}-->
           </div>
         </div>
       </div>

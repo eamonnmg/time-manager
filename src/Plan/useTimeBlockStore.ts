@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import type { ModelId, TimeBlock } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
-import { getTimeBlockEnd } from "@/Budget/budgetUtils";
+import { getTimeBlockEnd } from "@/Plan/DayView/utils";
 
 export const useTimeBlockStore = defineStore(
   "timeBlocks",
