@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import type { TimeBlockWithActivity } from "@/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
@@ -345,7 +345,7 @@ const updateGhost = () => {
   ghostHeight.value = targetGhostHeight.value;
 };
 
-function clickGhost() {
+function createTimeblockFromGhost() {
   emit("createTimeBloclGhostClicked", newTimeBlockGhost.value);
 }
 </script>
@@ -356,9 +356,10 @@ function clickGhost() {
     class="flex test h-full flex-auto flex-col"
     :style="`height: ${dayHeightPx}px`"
     @click="onTimelineClick"
+    @pointerup="createTimeblockFromGhost"
   >
     <div
-      class="sticky flex z-50 justify-center border-b border-gray-100 top-0 bg-white z-10"
+      class="sticky flex z-[3] justify-center border-b border-gray-100 top-0 bg-white z-10"
     >
       <time>
         {{ format(day, "EEEE") }}
@@ -416,19 +417,18 @@ function clickGhost() {
         />
         <div
           v-show="shouldShowNewTimeBlockGhosts"
-          class="absolute cursor-pointer transition-transform duration-100 left-0 z-40 w-full right-0 top-0 bottom-0 mt-px flex"
+          class="absolute select-none cursor-pointer transition-transform duration-100 left-0 z-[2] w-full right-0 top-0 bottom-0 mt-px flex"
           :style="{
             height: `${newTimeBlockGhost.height}px`,
             transform: `translateY(${newTimeBlockGhost.y}px)`,
           }"
-          @click.stop="clickGhost"
         >
           <div
             class="group bg-gray-50 absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5"
           >
             <div class="flex justify-between w-full h-full">
               <div class="flex-col flex">
-                <p class="font-semibold">Click to create new time block</p>
+                <p class="font-semibold">New time block</p>
                 <p class="">
                   <time datetime="2022-01-22T06:00"
                     >{{ newTimeBlockGhost.startTimeLabel }} -
