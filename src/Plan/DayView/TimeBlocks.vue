@@ -108,12 +108,12 @@ function calcIdealTextColor(color: string) {
     <li
       v-for="timeBlock in timeBlockViewObjs"
       :key="timeBlock.activity.name"
-      :class="['absolute left-0 w-full right-0 top-0 bottom-0 mt-px flex']"
+      class="absolute cursor-pointer left-0 w-full right-0 top-0 bottom-0 mt-px flex"
       :style="{
         height: `${timeBlock.height}px`,
         transform: `translateY(${timeBlock.y}px)`,
       }"
-      @click.stop="() => $emit('editTimeBlock', timeBlock)"
+      @click="() => $emit('editTimeBlock', timeBlock)"
     >
       <a
         href="#"

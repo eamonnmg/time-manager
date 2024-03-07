@@ -4,12 +4,20 @@ import type { TimeBlockWithActivity } from "@/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";
-import { endOfDay, format, isWithinInterval, startOfDay } from "date-fns";
+import {
+  endOfDay,
+  format,
+  isWithinInterval,
+  startOfDay,
+  subMilliseconds,
+  subMinutes,
+} from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { usePointer, watchThrottled } from "@vueuse/core";
 import { hoursToMs, msToHours, msToMinutes } from "@/Budget/budgetUtils";
 import {
   getTimeBlockEnd,
+  isDateRangeOverlappingDateRange,
   roundToNearest15Minutes,
   timeblocksBetweenDates,
 } from "@/Plan/DayView/utils";
@@ -56,12 +64,12 @@ const timeScale = computed(() => {
 });
 
 //create timeblock at position
-function onTimelineClick(e) {
-  const time = timeScale.value.invert(e.offsetY + props.scrollPos);
-
-  emit("timelineClicked", time);
-  // timeBlockStore.add(timeBlock);
-}
+// function onTimelineClick(e) {
+//   const time = timeScale.value.invert(e.offsetY + props.scrollPos);
+//
+//   emit("timelineClicked", time);
+//   // timeBlockStore.add(timeBlock);
+// }
 
 const ghostY = ref(0);
 const ghostTime = ref(new Date());
@@ -221,11 +229,20 @@ const collisionBlockBelow = computed<TimeBlockWithActivity | undefined>(() => {
 const collisionBlockAbove = computed<TimeBlockWithActivity | undefined>(() => {
   return timeBlocks.value.find((timeBlock) => {
     const targetGhostStartDate = timeScale.value.invert(targetGhostY.value);
+    const targetGhostEndDate = timeScale.value.invert(
+      targetGhostY.value + targetGhostHeight.value,
+    );
+    // return isWithinInterval(targetGhostStartDate, {
+    //   start: new Date(timeBlock.start),
+    //   end: getTimeBlockEnd(timeBlock),
+    // });
 
-    return isWithinInterval(targetGhostStartDate, {
-      start: new Date(timeBlock.start),
-      end: getTimeBlockEnd(timeBlock),
-    });
+    return isDateRangeOverlappingDateRange(
+      new Date(timeBlock.start),
+      getTimeBlockEnd(timeBlock),
+      targetGhostStartDate,
+      targetGhostEndDate,
+    );
   });
 });
 
@@ -249,10 +266,7 @@ const newTimeBlockGhost = computed(() => {
 });
 
 const shouldShowNewTimeBlockGhosts = computed(() => {
-  return (
-    pointer.isInside.value &&
-    (!isHoveringTimeBlock.value || isPointerDown.value)
-  );
+  return pointer.isInside.value && !isHoveringTimeBlock.value;
 });
 
 const pointer = usePointer({
@@ -277,6 +291,10 @@ watchThrottled(pointer.y, () => {
 
 const pointerPos = computed(() => {
   return pointer.y.value + props.scrollPos;
+});
+
+const pointerDate = computed(() => {
+  return timeScale.value.invert(pointerPos.value);
 });
 
 const updateGhost = () => {
@@ -330,6 +348,7 @@ const updateGhost = () => {
   }
 
   // if colliding with a time block above
+  console.log("collisionBlockAbove", collisionBlockAbove.value);
   if (collisionBlockAbove.value) {
     ghostTime.value = getTimeBlockEnd(collisionBlockAbove.value);
     ghostY.value = timeScale.value(ghostTime.value);
@@ -345,9 +364,35 @@ const updateGhost = () => {
   ghostHeight.value = targetGhostHeight.value;
 };
 
+const pointerDown = ref(false);
+const isDraggingPointer = ref(false);
+
 function createTimeblockFromGhost() {
+  isDraggingPointer.value = false;
+  if (isHoveringTimeBlock.value) {
+    return;
+  }
   emit("createTimeBloclGhostClicked", newTimeBlockGhost.value);
 }
+
+function onPointerDown(e) {
+  pointerDown.value = true;
+}
+
+function onPointerUp() {
+  pointerDown.value = false;
+  isDraggingPointer.value = false;
+  createTimeblockFromGhost();
+}
+
+function onPointerMove(e) {
+  if (isPointerDown.value) {
+    isDraggingPointer.value = true;
+  }
+  isDraggingPointer.value = true;
+}
+
+const showTargetGhost = ref(false);
 </script>
 
 <template>
@@ -355,15 +400,19 @@ function createTimeblockFromGhost() {
     ref="container"
     class="flex test h-full flex-auto flex-col"
     :style="`height: ${dayHeightPx}px`"
-    @click="onTimelineClick"
-    @pointerup="createTimeblockFromGhost"
+    @pointerdown="onPointerDown"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerUp"
   >
     <div
-      class="sticky flex z-[3] justify-center border-b border-gray-100 top-0 bg-white z-10"
+      class="sticky flex z-[7] justify-center border-b border-gray-100 top-0 bg-white z-10"
     >
       <time>
         {{ format(day, "EEEE") }}
       </time>
+      <span v-if="true"
+        >- ghost <input v-model="showTargetGhost" type="checkbox"
+      /></span>
     </div>
     <div class="flex w-full flex-auto">
       <div
@@ -443,11 +492,11 @@ function createTimeblockFromGhost() {
             </div>
           </div>
         </div>
-        <!--        debug ghost-->
+        <!--        debug target ghost-->
         <div
-          v-if="false"
+          v-if="showTargetGhost"
           ref="createTimeBlockGhost"
-          class="absolute opacity-70 z-50 transition-transform duration-100 left-0 w-full right-0 top-0 bottom-0 mt-px flex"
+          class="absolute opacity-70 z-[4] transition-transform duration-100 left-0 w-full right-0 top-0 bottom-0 mt-px flex"
           :style="{
             height: `${targetGhostHeight}px`,
             transform: `translateY(${targetGhostY}px)`,

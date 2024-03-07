@@ -63,3 +63,17 @@ export function timeblocksBetweenDates(
     );
   });
 }
+
+export function isDateRangeOverlappingDateRange(
+  start1: Date,
+  end1: Date,
+  start2: Date,
+  end2: Date,
+) {
+  return (
+    isWithinInterval(start1, { start: start2, end: end2 }) ||
+    isWithinInterval(end1, { start: start2, end: end2 }) ||
+    isWithinInterval(start2, { start: start1, end: end1 }) ||
+    isWithinInterval(end2, { start: start1, end: end1 })
+  );
+}
