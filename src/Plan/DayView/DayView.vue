@@ -411,7 +411,7 @@ const showTargetGhost = ref(false);
     @pointerup="onPointerUp"
   >
     <div
-      class="sticky flex z-[7] justify-center border-b border-gray-100 top-0 bg-white z-10"
+      class="sticky flex z-[7] justify-center border-b border-gray-100 top-0 bg-white"
     >
       <time>
         {{ format(day, "EEEE") }}
@@ -437,9 +437,6 @@ const showTargetGhost = ref(false);
           :time-scale="timeScale"
           :show-times="showTimesInMargin"
         >
-          <template #offset>
-            <div ref="containerOffset" class="row-end-1 h-7"></div>
-          </template>
         </HourDividerLines>
 
         <!--        only show if is within view-->

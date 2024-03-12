@@ -46,11 +46,11 @@ const scrollOffset = computed(() => {
   if (!navContainer.value) {
     return 0;
   }
-  const unexplainedOffset = 25;
+  const dayLabelHeight = 25;
   return (
     calendarScrollContainerScrollOffset.value -
     navContainer.value.$el.offsetHeight -
-    unexplainedOffset
+    dayLabelHeight
   );
 });
 
