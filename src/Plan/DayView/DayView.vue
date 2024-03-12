@@ -5,12 +5,14 @@ import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";
 import {
+  addSeconds,
   endOfDay,
   format,
   isWithinInterval,
   startOfDay,
   subMilliseconds,
   subMinutes,
+  subSeconds,
 } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { usePointer, watchThrottled } from "@vueuse/core";
@@ -59,9 +61,9 @@ onMounted(() => {
 
 const timeScale = computed(() => {
   // console.log("timeScale", [startOfDay(props.day), endOfDay(props.day)]);
-  return scaleTime()
-    .domain([startOfDay(props.day), endOfDay(props.day)])
-    .range([0, dayHeightPx]);
+  const start = startOfDay(props.day);
+  const end = endOfDay(props.day);
+  return scaleTime().domain([start, end]).range([0, dayHeightPx]);
 });
 
 //create timeblock at position

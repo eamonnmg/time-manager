@@ -2,7 +2,7 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type { ModelId, TimeBlock } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
-import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
+import { endOfDay, isWithinInterval, startOfDay, subMinutes } from "date-fns";
 import { getTimeBlockEnd } from "@/Plan/DayView/utils";
 
 export const useTimeBlockStore = defineStore(
@@ -23,15 +23,19 @@ export const useTimeBlockStore = defineStore(
     const timeBlocksWithActivityForDay = computed(() => {
       return (day: Date) => {
         return timeBlocksWithActivity.value.filter((tb: TimeBlock) => {
-          const isStartWithDay = isWithinInterval(new Date(tb.start), {
+          const isStartWithinDay = isWithinInterval(new Date(tb.start), {
             start: startOfDay(day),
             end: endOfDay(day),
           });
-          const isEndWithDay = isWithinInterval(getTimeBlockEnd(tb), {
-            start: startOfDay(day),
-            end: endOfDay(day),
-          });
-          return isStartWithDay || isEndWithDay;
+          const isEndWithinDay = isWithinInterval(
+            // subtract 1 minute from end to make it inclusive of 12:00am
+            subMinutes(getTimeBlockEnd(tb), 1),
+            {
+              start: startOfDay(day),
+              end: endOfDay(day),
+            },
+          );
+          return isStartWithinDay || isEndWithinDay;
         });
       };
     });
