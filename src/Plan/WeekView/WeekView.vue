@@ -6,6 +6,7 @@ import { computed } from "vue";
 interface Props {
   lastDayOfWeek: Date;
   scrollPos: number;
+  dayLabelHeight: number;
 }
 
 const props = defineProps<Props>();
@@ -24,6 +25,7 @@ const week = computed(() => {
       v-for="(day, index) in week"
       :key="day.toDateString()"
       :day="day"
+      :day-label-height="dayLabelHeight"
       :scroll-pos="scrollPos"
       :show-times-in-margin="index < 1"
       @edit-time-block="$emit('editTimeBlock', $event)"

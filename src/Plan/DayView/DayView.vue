@@ -26,6 +26,7 @@ interface Props {
   day: Date;
   showTimesInMargin?: boolean;
   scrollPos: number;
+  dayLabelHeight: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -411,7 +412,8 @@ const showTargetGhost = ref(false);
     @pointerup="onPointerUp"
   >
     <div
-      class="sticky h-[25px] flex z-[7] justify-center border-b border-gray-100 top-0 bg-white"
+      :style="`height: ${dayLabelHeight}px`"
+      class="sticky flex z-[7] justify-center border-b border-gray-100 top-0 bg-white"
     >
       <time>
         {{ format(day, "EEEE") }}

@@ -37,6 +37,9 @@ const budgetPeriodStore = useBudgetPeriodStore();
 const showTimeBlockActivityModal = ref(false);
 const calendarScrollContainer = ref<HTMLElement | null>(null);
 const dayHeightPx = ref(2800);
+// day label is the little sticky header at top of DayView shows the name of day of the week
+// unfortunately it be passed around as it impacts px offsets
+const dayLabelHeight = ref(25);
 const navContainer = ref<VueInstance | null>(null);
 
 const { y: calendarScrollContainerScrollOffset } = useScroll(
@@ -47,11 +50,10 @@ const scrollOffset = computed(() => {
   if (!navContainer.value) {
     return 0;
   }
-  const dayLabelHeight = 25;
   return (
     calendarScrollContainerScrollOffset.value -
     navContainer.value.$el.offsetHeight -
-    dayLabelHeight
+    dayLabelHeight.value
   );
 });
 
@@ -281,7 +283,7 @@ const timeScale = computed(() => {
         :time-scale="timeScale"
       />
       <div class="relative size-full">
-        <div class="absolute top-[25px] w-full">
+        <div :style="`top: ${dayLabelHeight}px`" class="absolute w-full">
           <HourDividerLines
             class="pointer-events-none"
             :day="timeScaleDay"
@@ -293,6 +295,7 @@ const timeScale = computed(() => {
           v-if="view === 'day'"
           :day="currentDay"
           :scroll-pos="scrollOffset"
+          :day-label-height="dayLabelHeight"
           @editTimeBlock="showEditTimeBlockModal"
           @timeline-clicked="createTimeBlockAtTime"
           @createTimeBloclGhostClicked="createTimeBlockFromGhost"
@@ -300,6 +303,7 @@ const timeScale = computed(() => {
         <WeekView
           v-if="view === 'week'"
           :scroll-pos="scrollOffset"
+          :day-label-height="dayLabelHeight"
           :last-day-of-week="lastDayOfCurrentWeek"
           @createTimeBloclGhostClicked="createTimeBlockFromGhost"
           @editTimeBlock="showEditTimeBlockModal"
