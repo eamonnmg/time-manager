@@ -265,8 +265,14 @@ const newTimeBlockGhost = computed(() => {
   };
 });
 
-const shouldShowNewTimeBlockGhosts = computed(() => {
-  return pointer.isInside.value && !isHoveringTimeBlock.value;
+// show ghost if pointer is inside container, and not hovering over a time block.
+// However, if pointer is down, then show ghost regardless of hovering over time block
+// the collision logic will ensure that the ghost is positioned correctly
+const shouldShowNewTimeBlockGhost = computed(() => {
+  return (
+    pointer.isInside.value &&
+    (isPointerDown.value || !isHoveringTimeBlock.value)
+  );
 });
 
 const pointer = usePointer({
@@ -465,7 +471,7 @@ const showTargetGhost = ref(false);
           @edit-time-block="$emit('editTimeBlock', $event)"
         />
         <div
-          v-show="shouldShowNewTimeBlockGhosts"
+          v-show="shouldShowNewTimeBlockGhost"
           class="absolute select-none cursor-pointer transition-transform duration-100 left-0 z-[2] w-full right-0 top-0 bottom-0 mt-px flex"
           :style="{
             height: `${newTimeBlockGhost.height}px`,
