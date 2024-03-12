@@ -411,33 +411,36 @@ const showTargetGhost = ref(false);
     @pointerup="onPointerUp"
   >
     <div
-      class="sticky flex z-[7] justify-center border-b border-gray-100 top-0 bg-white"
+      class="sticky h-[25px] flex z-[7] justify-center border-b border-gray-100 top-0 bg-white"
     >
       <time>
         {{ format(day, "EEEE") }}
       </time>
-      <span v-if="true"
+      <span v-if="false"
         >- ghost <input v-model="showTargetGhost" type="checkbox"
       /></span>
     </div>
     <div class="flex w-full flex-auto">
-      <div
-        class="flex-none bg-white"
-        :class="{
-          'w-14': showTimesInMargin,
-        }"
-      />
+      <!--      <div-->
+      <!--        class="flex-none bg-white"-->
+      <!--        :class="{-->
+      <!--          'w-14': showTimesInMargin,-->
+      <!--        }"-->
+      <!--      />-->
       <!--      <div class="grid flex-auto grid-cols-1 grid-rows-1">-->
       <!-- Horizontal lines -->
 
       <div class="relative w-full h-full">
-        <HourDividerLines
-          class="pointer-events-none"
-          :day="day"
-          :time-scale="timeScale"
-          :show-times="showTimesInMargin"
-        >
-        </HourDividerLines>
+        <!--        <HourDividerLines-->
+        <!--          class="pointer-events-none"-->
+        <!--          :day="day"-->
+        <!--          :time-scale="timeScale"-->
+        <!--          :show-times="showTimesInMargin"-->
+        <!--        >-->
+        <!--          <template #offset>-->
+        <!--            <div ref="containerOffset" class="row-end-1 h-7"></div>-->
+        <!--          </template>-->
+        <!--        </HourDividerLines>-->
 
         <!--        only show if is within view-->
         <div

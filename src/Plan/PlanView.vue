@@ -30,12 +30,13 @@ import { ChartPieIcon } from "@heroicons/vue/24/outline";
 import WeekView from "@/Plan/WeekView/WeekView.vue";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import { scaleTime } from "d3";
+import TimeAxisLables from "@/Plan/DayView/TimeAxisLables.vue";
 
 const timeBlockStore = useTimeBlockStore();
 const budgetPeriodStore = useBudgetPeriodStore();
 const showTimeBlockActivityModal = ref(false);
 const calendarScrollContainer = ref<HTMLElement | null>(null);
-
+const dayHeightPx = ref(2800);
 const navContainer = ref<VueInstance | null>(null);
 
 const { y: calendarScrollContainerScrollOffset } = useScroll(
@@ -140,7 +141,6 @@ const view = useLocalStorage<"day" | "week">("plan-view", "week");
 // date obj to create time scale
 const timeScaleDay = new Date();
 const timeScale = computed(() => {
-  console.log("timeScale", [startOfDay(timeScaleDay), endOfDay(timeScaleDay)]);
   return scaleTime()
     .domain([startOfDay(timeScaleDay), endOfDay(timeScaleDay)])
     .range([0, 2800]);
@@ -272,32 +272,39 @@ const timeScale = computed(() => {
     </AppHeader>
     <div
       ref="calendarScrollContainer"
-      class="h-full flex flex-auto overflow-auto bg-white"
+      :style="`height: ${dayHeightPx}px`"
+      class="w-full relative flex flex-auto overflow-auto bg-white"
     >
-      <!--      <HourDividerLines-->
-      <!--        class="pointer-events-none"-->
-      <!--        :day="timeScaleDay"-->
-      <!--        :time-scale="timeScale"-->
-      <!--      >-->
-      <!--        <template #offset>-->
-      <!--          <div ref="containerOffset" class="row-end-1 h-7"></div>-->
-      <!--        </template>-->
-      <!--      </HourDividerLines>-->
-      <DayView
-        v-if="view === 'day'"
-        :day="currentDay"
-        :scroll-pos="scrollOffset"
-        @editTimeBlock="showEditTimeBlockModal"
-        @timeline-clicked="createTimeBlockAtTime"
-        @createTimeBloclGhostClicked="createTimeBlockFromGhost"
+      <TimeAxisLables
+        :style="`height: ${dayHeightPx}px`"
+        class="mt-[18px]"
+        :time-scale="timeScale"
       />
-      <WeekView
-        v-if="view === 'week'"
-        :scroll-pos="scrollOffset"
-        :last-day-of-week="lastDayOfCurrentWeek"
-        @createTimeBloclGhostClicked="createTimeBlockFromGhost"
-        @editTimeBlock="showEditTimeBlockModal"
-      />
+      <div class="relative size-full">
+        <div class="absolute top-[25px] w-full">
+          <HourDividerLines
+            class="pointer-events-none"
+            :day="timeScaleDay"
+            :time-scale="timeScale"
+          >
+          </HourDividerLines>
+        </div>
+        <DayView
+          v-if="view === 'day'"
+          :day="currentDay"
+          :scroll-pos="scrollOffset"
+          @editTimeBlock="showEditTimeBlockModal"
+          @timeline-clicked="createTimeBlockAtTime"
+          @createTimeBloclGhostClicked="createTimeBlockFromGhost"
+        />
+        <WeekView
+          v-if="view === 'week'"
+          :scroll-pos="scrollOffset"
+          :last-day-of-week="lastDayOfCurrentWeek"
+          @createTimeBloclGhostClicked="createTimeBlockFromGhost"
+          @editTimeBlock="showEditTimeBlockModal"
+        />
+      </div>
 
       <div
         v-if="budgetPeriodStore.activePeriod && showBudgetPeriodSideBar"
