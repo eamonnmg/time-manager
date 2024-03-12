@@ -35,7 +35,7 @@ const editMode = computed(() => {
 const localActivityObject = ref<Activity>({
   id: "",
   name: "",
-  color: "",
+  color: "#000000",
   nestedActivities: [],
 });
 

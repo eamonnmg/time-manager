@@ -81,7 +81,7 @@ const mode = ref<"select" | "new">("select");
 const newActivityInitValue = {
   id: "",
   name: "",
-  color: "",
+  color: "#079AE4",
   nestedActivities: [],
 };
 const newActivity = ref<Activity>(newActivityInitValue);
