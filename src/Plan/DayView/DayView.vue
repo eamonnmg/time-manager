@@ -44,6 +44,7 @@ const container = ref(null);
 const containerOffset = ref(null);
 const nowLine = ref(null);
 const timeBlockStore = useTimeBlockStore();
+
 const navHeight = 81;
 const dayHeightPx = 2800;
 
