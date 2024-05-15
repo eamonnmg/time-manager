@@ -101,23 +101,23 @@ function roundToNearest15Minutes(date) {
   return date;
 }
 function createTimeBlockAtTime(time: Date) {
-  showTimeBlockActivityModal.value = true;
   selectedTimeBlock.value = {
     start: roundToNearest15Minutes(time),
     duration: 60 * 60 * 1000,
     activityId: "",
     color: "",
   };
+  showTimeBlockActivityModal.value = true;
 }
 
 function createTimeBlockFromGhost(ghost) {
-  showTimeBlockActivityModal.value = true;
   selectedTimeBlock.value = {
     start: ghost.time,
     duration: ghost.duration,
     activityId: "",
     color: "",
   };
+  showTimeBlockActivityModal.value = true;
 }
 
 function editTimeBlock(timeBlock: TimeBlock) {

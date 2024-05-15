@@ -12,7 +12,7 @@ import type { Activity, TimeBlock, TimeBlockCreate } from "@/types";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { minutesToMs, msToMinutes } from "@/Budget/budgetUtils";
-import { useCloned } from "@vueuse/core";
+import { formatDate, useCloned } from "@vueuse/core";
 
 interface Props {
   open: boolean;
@@ -37,7 +37,7 @@ const start = ref(new Date().toISOString().slice(0, 19));
 const duration = ref(minutesToMs(60));
 
 if (props.timeBlock && props.timeBlock.start) {
-  start.value = new Date(props.timeBlock.start).toISOString().slice(0, 19);
+  start.value = formatDate(new Date(props.timeBlock.start), "YYYY-MM-DDThh:mm");
 }
 
 if (props.timeBlock && props.timeBlock.duration) {

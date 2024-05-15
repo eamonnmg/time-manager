@@ -25,7 +25,7 @@ async function insertYjsUpdateToSupabase(yDoc) {
   const base64Encoded = fromUint8Array(documentState);
   const { data, error } = await supabase
     .from("yjs-updates")
-    .insert({ value: base64Encoded });
+    .upsert({ id: 1, value: base64Encoded });
 
   return { data, error };
 }
@@ -43,10 +43,18 @@ export const useTimeBlockStore = defineStore(
     //   filterBcConns: false,
     // });
 
+    ydoc.on("update", (update, origin) => {
+      console.log("origin", origin);
+      // dont push updates from IndexDB provider to Supabase
+      if (origin !== null) {
+        return;
+      }
+      // insert entire doc every time for now
+      insertYjsUpdateToSupabase(ydoc);
+    });
+
     getYjsUpdatesFromSupabase().then((test) => {
-      console.log(test);
       const yUpdate = toUint8Array(test[0].value);
-      console.log(yUpdate);
       Y.applyUpdate(ydoc, yUpdate);
     });
 
@@ -131,7 +139,7 @@ export const useTimeBlockStore = defineStore(
         },
       ]);
 
-      insertYjsUpdateToSupabase(ydoc);
+      // insertYjsUpdateToSupabase(ydoc);
     }
 
     function edit(timeBlock: TimeBlock) {
