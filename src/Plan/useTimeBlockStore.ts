@@ -4,79 +4,12 @@ import type { ModelId, TimeBlock } from "@/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { endOfDay, isWithinInterval, startOfDay, subMinutes } from "date-fns";
 import { getTimeBlockEnd } from "@/Plan/DayView/utils";
-import * as Y from "yjs";
-import { IndexeddbPersistence } from "y-indexeddb";
-import { WebrtcProvider } from "y-webrtc";
-import { supabase } from "@/lib/supabase";
-import { fromUint8Array, toUint8Array } from "js-base64";
-
-async function getYjsUpdatesFromSupabase() {
-  const { data } = await supabase
-    .from("yjs-updates")
-    .select()
-    .order("created_at", { ascending: false })
-    .limit(1);
-  return data;
-}
-
-async function insertYjsUpdateToSupabase(yDoc) {
-  const documentState = Y.encodeStateAsUpdate(yDoc); // is a Uint8Array
-  // Transform Uint8Array to a Base64-String
-  const base64Encoded = fromUint8Array(documentState);
-  const { data, error } = await supabase
-    .from("yjs-updates")
-    .upsert({ id: 1, value: base64Encoded });
-
-  return { data, error };
-}
 
 export const useTimeBlockStore = defineStore(
   "timeBlocks",
   () => {
     const activityStore = useActivitiesStore();
     const timeBlocks = ref<TimeBlock[]>([]);
-
-    const ydoc = new Y.Doc();
-    const roomName = "test-room";
-    const persistence = new IndexeddbPersistence(roomName, ydoc);
-    // const provider = new WebrtcProvider(roomName, ydoc, {
-    //   filterBcConns: false,
-    // });
-
-    ydoc.on("update", (update, origin) => {
-      console.log("origin", origin);
-      // dont push updates from IndexDB provider to Supabase
-      if (origin !== null) {
-        return;
-      }
-      // insert entire doc every time for now
-      insertYjsUpdateToSupabase(ydoc);
-    });
-
-    getYjsUpdatesFromSupabase().then((test) => {
-      const yUpdate = toUint8Array(test[0].value);
-      Y.applyUpdate(ydoc, yUpdate);
-    });
-
-    persistence.once("synced", () => {
-      console.log("initial content loaded");
-      timeBlocks.value = yTimeBlocks.toArray().map((i) => {
-        return {
-          ...i,
-          start: new Date(i.start),
-        };
-      });
-    });
-    const yTimeBlocks = ydoc.getArray();
-
-    yTimeBlocks.observe(() => {
-      timeBlocks.value = yTimeBlocks.toArray().map((i) => {
-        return {
-          ...i,
-          start: new Date(i.start),
-        };
-      });
-    });
 
     const timeBlocksWithActivity = computed(() => {
       return timeBlocks.value.map((tb: TimeBlock) => {
@@ -114,11 +47,6 @@ export const useTimeBlockStore = defineStore(
             start: new Date(start),
             end: new Date(end),
           });
-
-          if (x) {
-            console.log("XXX", new Date(tb.start), start, end);
-          }
-          // console.log("timeBlocksWithActivityForDateRange", x);
           return x;
         });
       };
@@ -126,20 +54,11 @@ export const useTimeBlockStore = defineStore(
 
     function add(timeBlock: TimeBlock) {
       const timeBlockId = self.crypto.randomUUID();
-      // timeBlocks.value.push({
-      //   ...timeBlock,
-      //   id: timeBlockId,
-      // });
+      timeBlocks.value.push({
+        ...timeBlock,
+        id: timeBlockId,
+      });
 
-      yTimeBlocks.push([
-        {
-          ...timeBlock,
-          id: timeBlockId,
-          start: timeBlock.start.toUTCString(),
-        },
-      ]);
-
-      // insertYjsUpdateToSupabase(ydoc);
     }
 
     function edit(timeBlock: TimeBlock) {
@@ -170,6 +89,6 @@ export const useTimeBlockStore = defineStore(
     };
   },
   {
-    persist: false,
+    persist: true,
   },
 );
