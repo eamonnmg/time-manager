@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import chroma from "chroma-js";
-import type { TimeBlockWithActivity } from "@/types";
+import type { TimeBlockWithActivity } from "@/shared/types";
 import { msToHours, msToMinutes } from "@/Budget/budgetUtils";
 import type { ScaleTime } from "d3";
 import { computed } from "vue";

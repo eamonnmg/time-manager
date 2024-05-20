@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import type { TimeBlockWithActivity } from "@/types";
+import type { TimeBlockWithActivity } from "@/shared/types";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";

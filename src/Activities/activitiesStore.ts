@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import type { Activity, ModelId } from "@/types";
+import type { Activity, ModelId } from "@/shared/types";
 
 const reading = {
   id: self.crypto.randomUUID(),

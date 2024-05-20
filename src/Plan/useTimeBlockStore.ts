@@ -1,6 +1,6 @@
 import { computed, ref, watch } from "vue";
 import { defineStore } from "pinia";
-import type { ModelId, TimeBlock } from "@/types";
+import type { ModelId, TimeBlock } from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { endOfDay, isWithinInterval, startOfDay, subMinutes } from "date-fns";
 import { getTimeBlockEnd } from "@/Plan/DayView/utils";
@@ -58,7 +58,6 @@ export const useTimeBlockStore = defineStore(
         ...timeBlock,
         id: timeBlockId,
       });
-
     }
 
     function edit(timeBlock: TimeBlock) {

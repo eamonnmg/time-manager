@@ -9,10 +9,10 @@ import type {
   BudgetPeriodWithBudget,
   ModelId,
   TimeBlockWithActivity,
-} from "@/types";
+} from "@/shared/types";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
 import { add, addMilliseconds } from "date-fns";
-import { timeBlocks } from "@/utils/testdata";
+import { timeBlocks } from "@/shared/utils/testdata";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { useActivitiesStore } from "@/Activities/activitiesStore";

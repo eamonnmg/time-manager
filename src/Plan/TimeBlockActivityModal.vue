@@ -8,7 +8,7 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 import { ClockIcon } from "@heroicons/vue/24/outline";
-import type { Activity, TimeBlock, TimeBlockCreate } from "@/types";
+import type { Activity, TimeBlock, TimeBlockCreate } from "@/shared/types";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { minutesToMs, msToMinutes } from "@/Budget/budgetUtils";

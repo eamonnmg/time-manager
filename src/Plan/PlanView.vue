@@ -16,7 +16,7 @@ import {
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid";
-import type { BudgetActivityWithActivity, TimeBlock } from "@/types";
+import type { BudgetActivityWithActivity, TimeBlock } from "@/shared/types";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { msToHours, msToMinutes } from "../Budget/budgetUtils";

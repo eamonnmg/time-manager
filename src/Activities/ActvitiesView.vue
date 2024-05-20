@@ -3,7 +3,7 @@ import { useActivitiesStore } from "@/Activities/activitiesStore";
 import AddActivityModal from "@/Activities/AddEditActivityModal.vue";
 import { nextTick, ref } from "vue";
 import AppHeader from "@/Plan/AppHeader.vue";
-import type { Activity } from "@/types";
+import type { Activity } from "@/shared/types";
 
 const { activities, add, edit } = useActivitiesStore();
 const showAddActivityModal = ref(false);

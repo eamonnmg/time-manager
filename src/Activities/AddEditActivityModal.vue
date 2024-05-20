@@ -7,7 +7,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from "@headlessui/vue";
-import type { Activity } from "@/types";
+import type { Activity } from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { storeToRefs } from "pinia";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";

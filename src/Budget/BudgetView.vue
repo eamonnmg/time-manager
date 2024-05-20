@@ -11,8 +11,6 @@ import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 
 const budgetId = useRoute().params.budgetId;
 
-console.log(budgetId);
-
 const budgetStore = useBudgetStore();
 const activityStore = useActivitiesStore();
 const budgetActivityStore = useBudgetActivityStore();

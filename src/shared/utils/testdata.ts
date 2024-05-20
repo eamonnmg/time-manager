@@ -1,4 +1,4 @@
-import type { TimeBlock } from "@/types";
+import type { TimeBlock } from "@/shared/types";
 import { add, startOfToday } from "date-fns";
 
 interface HourMin {

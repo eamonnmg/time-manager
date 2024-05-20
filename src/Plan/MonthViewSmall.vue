@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid";
-import { Day } from "@/types";
+import { Day } from "@/shared/types";
 
 interface Props {
   days: Day[];

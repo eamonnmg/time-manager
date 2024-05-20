@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import type { Activity } from "@/types";
+import type { Activity } from "@/shared/types";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
 import {
   Dialog,

@@ -1,4 +1,4 @@
-import type { TimeBlock } from "@/types";
+import type { TimeBlock } from "@/shared/types";
 
 export function msToHours(ms) {
   return ms / 1000 / 60 / 60;

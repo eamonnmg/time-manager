@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import type { Budget, CreateBudgetArgs, ModelId } from "@/types";
+import type { Budget, CreateBudgetArgs, ModelId } from "@/shared/types";
 import { hoursToMs } from "@/Budget/budgetUtils";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 

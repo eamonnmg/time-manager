@@ -9,7 +9,7 @@ import {
   ComboboxLabel,
 } from "@headlessui/vue";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
-import type { Activity } from "@/types";
+import type { Activity } from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 
 interface Props {

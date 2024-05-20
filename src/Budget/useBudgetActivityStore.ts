@@ -6,7 +6,7 @@ import type {
   BudgetActivity,
   BudgetActivityWithActivity,
   ModelId,
-} from "@/types";
+} from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
 import { hoursToMs } from "@/Budget/budgetUtils";

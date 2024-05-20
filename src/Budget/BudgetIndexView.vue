@@ -4,7 +4,7 @@ import { useBudgetStore } from "@/Budget/useBudgetStore";
 import { formatDuration } from "date-fns";
 import AddBudgetModal from "@/Budget/AddBudgetModal.vue";
 import { ref } from "vue";
-import { milliSecondsToDuration } from "@/utils/dateTimeHelpers";
+import { milliSecondsToDuration } from "@/shared/utils/dateTimeHelpers";
 
 const budgetStore = useBudgetStore();
 

@@ -1,4 +1,4 @@
-import type { TimeBlock, TimeBlockWithActivity } from "@/types";
+import type { TimeBlock, TimeBlockWithActivity } from "@/shared/types";
 import { addMilliseconds, isWithinInterval, subMilliseconds } from "date-fns";
 
 export function roundToNearest15Minutes(date) {
