@@ -11,9 +11,7 @@ import {
 } from "@headlessui/vue";
 
 import { ClockIcon } from "@heroicons/vue/24/outline";
-import {
-  milliseconds,
-} from "date-fns";
+import { milliseconds } from "date-fns";
 
 interface Props {
   open: boolean;
