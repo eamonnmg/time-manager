@@ -79,7 +79,6 @@ export const useBudgetActivityStore = defineStore(
         return getAllForBudget
           .value(budgetId)
           .reduce((acc: number, ba: BudgetActivityWithActivity) => {
-            console.log(ba);
             return acc + ba.allocatedTime;
           }, 0);
       };

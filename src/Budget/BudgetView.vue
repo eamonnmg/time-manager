@@ -9,6 +9,7 @@ import { computed } from "vue";
 import { msToHours } from "@/Budget/budgetUtils";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import DurationInput from "@/shared/components/DurationInput.vue";
+import BaseInput from "@/shared/components/BaseInput.vue";
 
 const budgetId = useRoute().params.budgetId;
 
@@ -145,7 +146,10 @@ function apply() {
       <!--      config-->
       <div class="w-1/3">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-          Name: <input v-model="budget.name" type="text" />
+          <div class="space-y-2">
+            <label for="budgetName">Name</label>
+            <BaseInput id="budgetName" v-model="budget.name" type="text" />
+          </div>
           <br />
           <!--                    Duration Hours:-->
           <!--                    <input-->
@@ -158,28 +162,26 @@ function apply() {
           <!--                        )-->
           <!--                      "-->
           <!--                    />-->
-          {{ budget.duration }}
           <DurationInput
+            label="Duration"
             :milliseconds="budget.duration"
             @update:milliseconds="
               budgetStore.setBudgetDuration(budget.id, $event)
             "
           />
           <br />
-          Occupied time (sleep, work etc):
-          <input
-            :value="msToHours(budget.occupiedTime)"
-            type="number"
-            @input="
-              budgetStore.setBudgetOccupiedTimeInHours(
-                budget.id,
-                $event.target.value,
-              )
+
+          <DurationInput
+            label="Occupied time"
+            :milliseconds="budget.occupiedTime"
+            @update:milliseconds="
+              budgetStore.setBudgetOccupiedTime(budget.id, $event)
             "
           />
+
           <br />
-          Activities:
           <ActivityPicker
+            label="Add activities"
             :activities="activityStore.activities"
             :multiple="false"
             @update:model-value="onActivitySelected"

@@ -13,8 +13,8 @@ import type { Activity } from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 
 interface Props {
-  modelValue: Activity[] | Activity;
-  activities: Activity[];
+  modelValue?: Activity[] | Activity;
+  activities?: Activity[];
   label?: string;
   multiple?: boolean;
 }

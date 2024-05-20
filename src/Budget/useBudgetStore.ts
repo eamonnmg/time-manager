@@ -77,7 +77,7 @@ export const useBudgetStore = defineStore(
       budgets.value[targetIdx].duration = milliseconds;
     }
 
-    function setBudgetOccupiedTimeInHours(budgetId: ModelId, hours: number) {
+    function setBudgetOccupiedTime(budgetId: ModelId, milliseconds: number) {
       const targetIdx = budgets.value.findIndex(
         (b: Budget) => b.id === budgetId,
       );
@@ -85,7 +85,7 @@ export const useBudgetStore = defineStore(
         console.error("budget not found");
         return;
       }
-      budgets.value[targetIdx].occupiedTime = hoursToMs(hours);
+      budgets.value[targetIdx].occupiedTime = milliseconds;
     }
 
     return {
@@ -95,7 +95,7 @@ export const useBudgetStore = defineStore(
       add,
       edit,
       setBudgetDuration,
-      setBudgetOccupiedTimeInHours,
+      setBudgetOccupiedTime,
       isActive,
     };
   },
