@@ -12,7 +12,6 @@ import type {
 } from "@/shared/types";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
 import { add, addMilliseconds } from "date-fns";
-import { timeBlocks } from "@/shared/utils/testdata";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
@@ -21,8 +20,6 @@ export const useBudgetPeriodStore = defineStore(
   "budgetPeriods",
   () => {
     const budgetStore = useBudgetStore();
-    const activitiesStore = useActivitiesStore();
-    const budgetActivityStore = useBudgetActivityStore();
     const timeBlocksStore = useTimeBlockStore();
     const budgetsPeriods = ref<BudgetPeriod[]>([]);
 

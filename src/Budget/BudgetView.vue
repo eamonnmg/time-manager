@@ -8,6 +8,7 @@ import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { computed } from "vue";
 import { msToHours } from "@/Budget/budgetUtils";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
+import DurationInput from "@/shared/components/DurationInput.vue";
 
 const budgetId = useRoute().params.budgetId;
 
@@ -52,12 +53,18 @@ function apply() {
   <div class="flex h-full w-full flex-col">
     <AppHeader>
       <template #left>
-        <h1 class="text-base font-semibold leading-6 text-gray-900">
-          Edit Budget
-          <span class="badge badge-primary">{{
-            budgetStore.getById(budgetId.toString()).name
-          }}</span>
-        </h1>
+        <div class="flex items-center space-x-2">
+          <RouterLink
+            class="text-xl hover:underline"
+            :to="{ name: 'budgetIndex' }"
+          >
+            Budgets
+          </RouterLink>
+          <span>/</span>
+          <h1 class="text-xl font-semibold leading-6 text-gray-900">
+            {{ budgetStore.getById(budgetId.toString()).name }}
+          </h1>
+        </div>
         <p class="mt-2 text-sm text-gray-700">
           A budget defines how you want to allocate your time for a period
         </p>
@@ -140,15 +147,22 @@ function apply() {
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           Name: <input v-model="budget.name" type="text" />
           <br />
-          Duration Hours:
-          <input
-            :value="msToHours(budget.duration)"
-            type="number"
-            @input="
-              budgetStore.setBudgetDurationInHours(
-                budget.id,
-                $event.target.value,
-              )
+          <!--                    Duration Hours:-->
+          <!--                    <input-->
+          <!--                      :value="msToHours(budget.duration)"-->
+          <!--                      type="number"-->
+          <!--                      @input="-->
+          <!--                        budgetStore.setBudgetDurationInHours(-->
+          <!--                          budget.id,-->
+          <!--                          $event.target.value,-->
+          <!--                        )-->
+          <!--                      "-->
+          <!--                    />-->
+          {{ budget.duration }}
+          <DurationInput
+            :milliseconds="budget.duration"
+            @update:milliseconds="
+              budgetStore.setBudgetDuration(budget.id, $event)
             "
           />
           <br />
