@@ -7,7 +7,6 @@ import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { computed } from "vue";
 import { msToHours } from "@/Budget/budgetUtils";
-import { apply } from "autoprefixer";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 
 const budgetId = useRoute().params.budgetId;

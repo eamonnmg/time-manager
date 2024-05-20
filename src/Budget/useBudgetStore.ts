@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import type { Budget, ModelId } from "@/types";
+import type { Budget, CreateBudgetArgs, ModelId } from "@/types";
 import { hoursToMs } from "@/Budget/budgetUtils";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 
@@ -46,10 +46,11 @@ export const useBudgetStore = defineStore(
       };
     });
 
-    function add(budget: Budget) {
+    function add(budget: CreateBudgetArgs) {
       const id = self.crypto.randomUUID();
       budgets.value.push({
         ...budget,
+        occupiedTime: 0,
         id,
       });
     }

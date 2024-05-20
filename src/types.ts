@@ -40,6 +40,14 @@ export interface Budget {
   occupiedTime: number;
 }
 
+export interface CreateBudgetArgs {
+  name: string;
+  /**
+   * Duration in milliseconds
+   */
+  duration: number;
+}
+
 export interface BudgetActivity {
   id: ModelId;
   budgetId: string | number;

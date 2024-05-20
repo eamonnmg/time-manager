@@ -1,5 +1,4 @@
 import type { TimeBlock, TimeBlockWithActivity } from "@/types";
-import type { ScaleTime } from "d3";
 import { addMilliseconds, isWithinInterval, subMilliseconds } from "date-fns";
 
 export function roundToNearest15Minutes(date) {
