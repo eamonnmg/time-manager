@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { BudgetActivityWithActivity } from "@/shared/types";
+import type { BudgetActivityWithActivity, ModelId } from "@/shared/types";
 import { computed, ref } from "vue";
-import { scaleLinear, stack, union } from "d3";
+import { scaleLinear } from "d3";
 import { useElementSize } from "@vueuse/core";
+import { calcPercentageOfTimeAllocated } from "@/Budget/budgetUtils";
 
 interface Props {
   totalTimeMs: number;
@@ -15,8 +16,9 @@ const rootEl = ref();
 
 const { width } = useElementSize(rootEl);
 
+const hoveredActivityId = ref<ModelId>(null);
+
 const scale = computed(() => {
-  // console.log("timeScale", [startOfDay(props.day), endOfDay(props.day)]);
   const start = 0;
   const end = props.totalTimeMs;
   return scaleLinear().domain([start, end]).range([0, width.value]);
@@ -47,13 +49,22 @@ const data = computed(() => {
     <div
       v-for="item in data"
       :key="item.id"
+      :class="{
+        'opacity-60':
+          hoveredActivityId !== null && hoveredActivityId !== item.id,
+      }"
       class="absolute first:rounded-l-full last:rounded-r-full cursor-pointer tooltip h-4 hover:scale-125"
-      :data-tip="item.activity.name"
+      :data-tip="`${item.activity.name} - ${calcPercentageOfTimeAllocated(
+        item.allocatedTime,
+        totalTimeMs,
+      ).toFixed(0)}%`"
       :style="{
         width: `${item.width}px`,
         transform: `translateX(${item.x}px)`,
         background: item.activity.color,
       }"
+      @mouseover="hoveredActivityId = item.id"
+      @mouseleave="hoveredActivityId = null"
     ></div>
   </div>
 </template>

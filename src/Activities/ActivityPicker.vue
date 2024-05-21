@@ -116,13 +116,14 @@ function saveNewActivity() {
     :model-value="modelValue"
     as="div"
     by="id"
+    class="w-full"
     :multiple="multiple"
     @update:modelValue="onSelected"
   >
     <ComboboxLabel class="block text-sm font-medium leading-6 text-gray-900">{{
       label
     }}</ComboboxLabel>
-    <div class="relative mt-2">
+    <div class="relative w-full mt-2">
       <ComboboxInput
         :display-value="displayValueFn"
         class="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"

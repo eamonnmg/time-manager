@@ -6,11 +6,12 @@ import ActivityPicker from "@/Activities/ActivityPicker.vue";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { computed } from "vue";
-import { msToHours } from "@/Budget/budgetUtils";
+import { calcPercentageOfTimeAllocated, msToHours } from "@/Budget/budgetUtils";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import DurationInput from "@/shared/components/DurationInput.vue";
 import BaseInput from "@/shared/components/BaseInput.vue";
 import BudgetActivityStackedBarChart from "@/Budget/BudgetActivityStackedBarChart.vue";
+import RadialProgress from "@/shared/components/RadialProgress.vue";
 
 const budgetId = useRoute().params.budgetId;
 
@@ -24,8 +25,20 @@ const budgetActivities = computed(() => {
   return budgetActivityStore.getAllForBudget(budgetId.toString());
 });
 
+const totalBudgetTime = computed(() => {
+  return budgetStore.getAvailableTimeForBudget(budgetId);
+});
+
 const remainingTime = computed(() => {
   return budgetActivityStore.remainingTimeForBudget(budgetId.toString());
+});
+
+const totalPercentageOfBudgetTimeAllocated = computed(() => {
+  return (
+    ((budget.duration - remainingTime.value) /
+      (budget.duration - budget.occupiedTime)) *
+    100
+  ).toFixed(0);
 });
 
 function onActivitySelected(e) {
@@ -84,11 +97,25 @@ function apply() {
     </AppHeader>
     <!--    // activies-->
     <div class="px-4 relative h-full divide-x space-x-4 flex">
-      <div class="w-2/3 relative flex flex-col divide-y space-x-4">
+      <div class="w-2/3 relative flex flex-col divide-y space-y-4">
         <div class="w-full py-4 flex items-center">
-          <BudgetActivityStackedBarChart
-            :total-time-ms="budgetStore.getAvailableTimeForBudget(budgetId)"
-            :budget-activities="budgetActivities"
+          <div class="w-full">
+            <p>
+              {{ totalPercentageOfBudgetTimeAllocated }}% total time allocated
+            </p>
+            <BudgetActivityStackedBarChart
+              :total-time-ms="totalBudgetTime"
+              :budget-activities="budgetActivities"
+            />
+          </div>
+        </div>
+        <div class="w-full py-4 flex items-center">
+          <ActivityPicker
+            class=""
+            label="Add activity"
+            :activities="activityStore.activities"
+            :multiple="false"
+            @update:model-value="onActivitySelected"
           />
         </div>
         <table class="table">
@@ -96,6 +123,17 @@ function apply() {
             <!-- row 1 -->
             <tr v-for="activity in budgetActivities" :key="activity.id">
               <td>{{ activity.activity.name }}</td>
+              <td>
+                <RadialProgress
+                  class=""
+                  :value="
+                    calcPercentageOfTimeAllocated(
+                      activity.allocatedTime,
+                      totalBudgetTime,
+                    )
+                  "
+                />
+              </td>
               <td class="">
                 <input
                   :value="msToHours(activity.allocatedTime)"
@@ -113,10 +151,10 @@ function apply() {
                 />
               </td>
               <td>
-                <input
+                <!--                todo add plus and neg buttons beside-->
+                <BaseInput
                   :value="msToHours(activity.allocatedTime)"
                   type="number"
-                  class="input input-bordered"
                   min="0"
                   :max="msToHours(remainingTime + activity.allocatedTime)"
                   @input="
@@ -165,14 +203,6 @@ function apply() {
             @update:milliseconds="
               budgetStore.setBudgetOccupiedTime(budget.id, $event)
             "
-          />
-
-          <br />
-          <ActivityPicker
-            label="Add activities"
-            :activities="activityStore.activities"
-            :multiple="false"
-            @update:model-value="onActivitySelected"
           />
         </div>
       </div>

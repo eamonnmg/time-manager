@@ -15,3 +15,10 @@ export function msToMinutes(ms): number {
 export function minutesToMs(minutes): number {
   return minutes * 60 * 1000;
 }
+
+export function calcPercentageOfTimeAllocated(
+  allocatedTimeMs: number,
+  totalTimeMs: number,
+) {
+  return (allocatedTimeMs / totalTimeMs) * 100;
+}

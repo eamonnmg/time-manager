@@ -2,7 +2,6 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type {
   Activity,
-  BudgetActivity,
   BudgetActivityWithActivity,
   BudgetPeriod,
   BudgetPeriodCreate,
@@ -11,10 +10,8 @@ import type {
   TimeBlockWithActivity,
 } from "@/shared/types";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
-import { add, addMilliseconds } from "date-fns";
+import { addMilliseconds } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
-import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
-import { useActivitiesStore } from "@/Activities/activitiesStore";
 
 export const useBudgetPeriodStore = defineStore(
   "budgetPeriods",
