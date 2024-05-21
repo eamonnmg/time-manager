@@ -5,12 +5,12 @@ import { useRoute } from "vue-router";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { calcPercentageOfTimeAllocated, msToHours } from "@/Budget/budgetUtils";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import DurationInput from "@/shared/components/DurationInput.vue";
 import BaseInput from "@/shared/components/BaseInput.vue";
-import BudgetActivityStackedBarChart from "@/Budget/BudgetActivityStackedBarChart.vue";
+import BudgetActivityAllocationChart from "@/Budget/BudgetActivityAllocationChart.vue";
 import RadialProgress from "@/shared/components/RadialProgress.vue";
 
 const budgetId = useRoute().params.budgetId;
@@ -18,6 +18,8 @@ const budgetId = useRoute().params.budgetId;
 const budgetStore = useBudgetStore();
 const activityStore = useActivitiesStore();
 const budgetActivityStore = useBudgetActivityStore();
+
+const hoveredActivityId = ref(null);
 
 const budget = budgetStore.getById(budgetId.toString());
 
@@ -43,13 +45,6 @@ const totalPercentageOfBudgetTimeAllocated = computed(() => {
 
 function onActivitySelected(e) {
   budgetActivityStore.add(budgetId.toString(), e.id);
-}
-
-function onActivityTimeChanged(activity, e) {
-  budgetActivityStore.setAllocatedTime(
-    activity.activityId,
-    Number(e.target.value),
-  );
 }
 
 const budgetPeriodStore = useBudgetPeriodStore();
@@ -103,9 +98,10 @@ function apply() {
             <p>
               {{ totalPercentageOfBudgetTimeAllocated }}% total time allocated
             </p>
-            <BudgetActivityStackedBarChart
+            <BudgetActivityAllocationChart
               :total-time-ms="totalBudgetTime"
               :budget-activities="budgetActivities"
+              :active-activity-id="hoveredActivityId"
             />
           </div>
         </div>
@@ -121,11 +117,19 @@ function apply() {
         <table class="table">
           <tbody>
             <!-- row 1 -->
-            <tr v-for="activity in budgetActivities" :key="activity.id">
+            <tr
+              v-for="activity in budgetActivities"
+              :key="activity.id"
+              @mouseover="hoveredActivityId = activity.id"
+              @mouseleave="hoveredActivityId = null"
+            >
               <td>{{ activity.activity.name }}</td>
               <td>
                 <RadialProgress
-                  class=""
+                  :style="{
+                    color: activity.activity.color,
+                    '--size': '3rem',
+                  }"
                   :value="
                     calcPercentageOfTimeAllocated(
                       activity.allocatedTime,

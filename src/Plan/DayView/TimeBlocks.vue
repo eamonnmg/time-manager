@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import chroma from "chroma-js";
 import type { TimeBlockWithActivity } from "@/shared/types";
 import { msToHours, msToMinutes } from "@/Budget/budgetUtils";
 import type { ScaleTime } from "d3";
 import { computed } from "vue";
+import { calcIdealTextColorFromBg } from "@/shared/utils/colors";
 
 interface Props {
   timeBlocks: TimeBlockWithActivity[];
@@ -88,18 +88,6 @@ function timeBlockToDayViewTimeBlock(
     durationLabel: calcDurationLable(),
   };
 }
-
-function calcIdealTextColor(color: string) {
-  if (!color) return "#000";
-  // chroma throws error if color is not valid
-  try {
-    // use white text if contrast acceptable
-    const contrast = chroma.contrast("#fff", color);
-    return contrast - 4.5 >= 0 ? "white" : "black";
-  } catch {
-    return "black";
-  }
-}
 </script>
 
 <template>
@@ -119,7 +107,7 @@ function calcIdealTextColor(color: string) {
         href="#"
         :style="`background-color: ${
           timeBlock.activity.color
-        }; color: ${calcIdealTextColor(timeBlock.activity.color)}`"
+        }; color: ${calcIdealTextColorFromBg(timeBlock.activity.color)}`"
         :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5`"
       >
         <div class="flex justify-between w-full h-full">

@@ -8,9 +8,12 @@ import { calcPercentageOfTimeAllocated } from "@/Budget/budgetUtils";
 interface Props {
   totalTimeMs: number;
   budgetActivities: BudgetActivityWithActivity[];
+  activeActivityId?: ModelId;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  activeActivityId: null,
+});
 
 const rootEl = ref();
 
@@ -39,6 +42,14 @@ const data = computed(() => {
     })
     .filter((i) => i.allocatedTime > 0);
 });
+
+const highlightedActivity = computed(() => {
+  return hoveredActivityId.value || props.activeActivityId;
+});
+
+function isHighlightedActivity(activityId: ModelId) {
+  return highlightedActivity.value === activityId;
+}
 </script>
 
 <template>
@@ -50,17 +61,21 @@ const data = computed(() => {
       v-for="item in data"
       :key="item.id"
       :class="{
-        'opacity-60':
-          hoveredActivityId !== null && hoveredActivityId !== item.id,
+        ' z-10': highlightedActivity && !isHighlightedActivity(item.id),
+        'z-20 tooltip-open': isHighlightedActivity(item.id),
       }"
-      class="absolute first:rounded-l-full last:rounded-r-full cursor-pointer tooltip h-4 hover:scale-125"
+      class="absolute transition duration-200 first:rounded-l-full last:rounded-r-full cursor-pointer tooltip h-4"
       :data-tip="`${item.activity.name} - ${calcPercentageOfTimeAllocated(
         item.allocatedTime,
         totalTimeMs,
       ).toFixed(0)}%`"
       :style="{
         width: `${item.width}px`,
-        transform: `translateX(${item.x}px)`,
+        transform: `translateX(${item.x}px) ${
+          highlightedActivity !== null && highlightedActivity === item.id
+            ? 'scale(1.1)'
+            : ''
+        }`,
         background: item.activity.color,
       }"
       @mouseover="hoveredActivityId = item.id"
