@@ -10,6 +10,7 @@ import { msToHours } from "@/Budget/budgetUtils";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import DurationInput from "@/shared/components/DurationInput.vue";
 import BaseInput from "@/shared/components/BaseInput.vue";
+import BudgetActivityStackedBarChart from "@/Budget/BudgetActivityStackedBarChart.vue";
 
 const budgetId = useRoute().params.budgetId;
 
@@ -82,38 +83,25 @@ function apply() {
       </template>
     </AppHeader>
     <!--    // activies-->
-    <div class="px-4 h-full divide-x space-x-4 flex">
-      <div class="w-2/3 flex flex-col mt-6">
-        <div>
-          <progress
-            class="progress"
-            :value="
-              msToHours(
-                budgetActivityStore.totalAllocatedTimeForBudget(
-                  budgetId.toString(),
-                ),
-              )
-            "
-            :max="msToHours(budgetStore.getAvailableTimeForBudget(budgetId))"
-          ></progress>
+    <div class="px-4 relative h-full divide-x space-x-4 flex">
+      <div class="w-2/3 relative flex flex-col divide-y space-x-4">
+        <div class="w-full py-4 flex items-center">
+          <BudgetActivityStackedBarChart
+            :total-time-ms="budgetStore.getAvailableTimeForBudget(budgetId)"
+            :budget-activities="budgetActivities"
+          />
         </div>
         <table class="table">
-          <!-- head -->
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Time</th>
-            </tr>
-          </thead>
           <tbody>
             <!-- row 1 -->
             <tr v-for="activity in budgetActivities" :key="activity.id">
               <td>{{ activity.activity.name }}</td>
-              <td class="flex space-x-2">
+              <td class="">
                 <input
                   :value="msToHours(activity.allocatedTime)"
                   type="range"
-                  class="range"
+                  class="range range-xs"
+                  :style="`--range-shdw: ${activity.activity.color}`"
                   min="0"
                   :max="msToHours(remainingTime + activity.allocatedTime)"
                   @input="
