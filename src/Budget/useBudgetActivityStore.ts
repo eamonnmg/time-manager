@@ -6,6 +6,7 @@ import type {
   BudgetActivity,
   BudgetActivityWithActivity,
   ModelId,
+  TimeBlock,
 } from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
@@ -45,6 +46,42 @@ export const useBudgetActivityStore = defineStore(
       budgetActivities.value[targetIdx].allocatedTime = hoursToMs(hours);
     }
 
+    // decrement by one hour
+    function decrementAllocatedTime(budgetActivityId: ModelId) {
+      const targetIdx = budgetActivities.value.findIndex(
+        (ba: BudgetActivity) => ba.id === budgetActivityId,
+      );
+      if (targetIdx === -1) {
+        console.error("budget activity not found");
+        return;
+      }
+      if (budgetActivities.value[targetIdx].allocatedTime < hoursToMs(1)) {
+        console.error("cannot allocate less than 1 hour");
+        return;
+      }
+      budgetActivities.value[targetIdx].allocatedTime -= hoursToMs(1);
+    }
+
+    //increment by one hour
+    function incrementAllocatedTime(budgetActivityId: ModelId) {
+      const targetIdx = budgetActivities.value.findIndex(
+        (ba: BudgetActivity) => ba.id === budgetActivityId,
+      );
+      if (targetIdx === -1) {
+        console.error("budget activity not found");
+        return;
+      }
+      if (
+        remainingTimeForBudget.value(
+          budgetActivities.value[targetIdx].budgetId,
+        ) < hoursToMs(1)
+      ) {
+        console.error("cant allocate another hour, not enough time left");
+        return;
+      }
+      budgetActivities.value[targetIdx].allocatedTime += hoursToMs(1);
+    }
+
     function add(budgetId: string, activityId: string) {
       const id = self.crypto.randomUUID();
       budgetActivities.value.push({
@@ -53,6 +90,12 @@ export const useBudgetActivityStore = defineStore(
         activityId,
         allocatedTime: 0,
       });
+    }
+
+    function remove(id: ModelId) {
+      budgetActivities.value = budgetActivities.value.filter(
+        (ba) => ba.id !== id,
+      );
     }
 
     const budgetActivitiesWithActivity = computed(() => {
@@ -75,7 +118,7 @@ export const useBudgetActivityStore = defineStore(
     });
 
     const totalAllocatedTimeForBudget = computed(() => {
-      return (budgetId: string): number => {
+      return (budgetId: ModelId): number => {
         return getAllForBudget
           .value(budgetId)
           .reduce((acc: number, ba: BudgetActivityWithActivity) => {
@@ -85,7 +128,7 @@ export const useBudgetActivityStore = defineStore(
     });
 
     const remainingTimeForBudget = computed(() => {
-      return (budgetId: string): number => {
+      return (budgetId: ModelId): number => {
         const budget = budgetStore.getById(budgetId);
         if (!budget) {
           console.error("budget not found");
@@ -105,8 +148,11 @@ export const useBudgetActivityStore = defineStore(
       totalAllocatedTimeForBudget,
       remainingTimeForBudget,
       setAllocatedTime,
+      decrementAllocatedTime,
+      incrementAllocatedTime,
       getById,
       add,
+      remove,
     };
   },
   {

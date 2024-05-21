@@ -48,7 +48,7 @@ const highlightedActivity = computed(() => {
 });
 
 function isHighlightedActivity(activityId: ModelId) {
-  return highlightedActivity.value === activityId;
+  return highlightedActivity.value === activityId && data.value.length > 1;
 }
 </script>
 
@@ -62,9 +62,9 @@ function isHighlightedActivity(activityId: ModelId) {
       :key="item.id"
       :class="{
         ' z-10': highlightedActivity && !isHighlightedActivity(item.id),
-        'z-20 tooltip-open': isHighlightedActivity(item.id),
+        'z-20 tooltip-open rounded-full': isHighlightedActivity(item.id),
       }"
-      class="absolute transition duration-200 first:rounded-l-full last:rounded-r-full cursor-pointer tooltip h-4"
+      class="absolute transition-all duration-200 first:rounded-l-full last:rounded-r-full cursor-pointer tooltip h-4"
       :data-tip="`${item.activity.name} - ${calcPercentageOfTimeAllocated(
         item.allocatedTime,
         totalTimeMs,
@@ -72,8 +72,8 @@ function isHighlightedActivity(activityId: ModelId) {
       :style="{
         width: `${item.width}px`,
         transform: `translateX(${item.x}px) ${
-          highlightedActivity !== null && highlightedActivity === item.id
-            ? 'scale(1.1)'
+          highlightedActivity && isHighlightedActivity(item.id)
+            ? 'scale(1.05)'
             : ''
         }`,
         background: item.activity.color,

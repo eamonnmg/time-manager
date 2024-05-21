@@ -13,7 +13,7 @@ import BaseInput from "@/shared/components/BaseInput.vue";
 import BudgetActivityAllocationChart from "@/Budget/BudgetActivityAllocationChart.vue";
 import RadialProgress from "@/shared/components/RadialProgress.vue";
 
-const budgetId = useRoute().params.budgetId;
+const budgetId = useRoute().params.budgetId as string;
 
 const budgetStore = useBudgetStore();
 const activityStore = useActivitiesStore();
@@ -93,7 +93,10 @@ function apply() {
     <!--    // activies-->
     <div class="px-4 relative h-full divide-x space-x-4 flex">
       <div class="w-2/3 relative flex flex-col divide-y space-y-4">
-        <div class="w-full py-4 flex items-center">
+        <div
+          v-if="budgetActivities.length"
+          class="w-full py-4 flex items-center"
+        >
           <div class="w-full">
             <p>
               {{ totalPercentageOfBudgetTimeAllocated }}% total time allocated
@@ -156,18 +159,61 @@ function apply() {
               </td>
               <td>
                 <!--                todo add plus and neg buttons beside-->
-                <BaseInput
-                  :value="msToHours(activity.allocatedTime)"
-                  type="number"
-                  min="0"
-                  :max="msToHours(remainingTime + activity.allocatedTime)"
-                  @input="
-                    budgetActivityStore.setAllocatedTime(
-                      activity.id,
-                      $event.target.value,
-                    )
-                  "
-                />
+                <div class="flex w-36 items-center space-x-2">
+                  <button
+                    class="btn btn-sm btn-ghost btn-circle"
+                    :disabled="activity.allocatedTime === 0"
+                    @click="
+                      budgetActivityStore.decrementAllocatedTime(activity.id)
+                    "
+                  >
+                    -
+                  </button>
+
+                  <BaseInput
+                    :value="msToHours(activity.allocatedTime)"
+                    type="number"
+                    min="0"
+                    :max="msToHours(remainingTime + activity.allocatedTime)"
+                    @input="
+                      budgetActivityStore.setAllocatedTime(
+                        activity.id,
+                        $event.target.value,
+                      )
+                    "
+                  />
+                  <button
+                    class="btn btn-sm btn-ghost btn-circle"
+                    :disabled="remainingTime < msToHours(1)"
+                    @click="
+                      budgetActivityStore.incrementAllocatedTime(activity.id)
+                    "
+                  >
+                    +
+                  </button>
+                </div>
+              </td>
+              <td class="text-end">
+                <button
+                  data-tip="Remove activity"
+                  class="btn btn-sm btn-ghost tooltip"
+                  @click="budgetActivityStore.remove(activity.id)"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
