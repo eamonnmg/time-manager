@@ -11,6 +11,7 @@ import {
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid";
 import type { Activity } from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
+import AddEditActivityModal from "@/Activities/AddEditActivityModal.vue";
 
 interface Props {
   modelValue?: Activity[] | Activity;
@@ -76,43 +77,35 @@ const displayValueFn = () => {
   return props.modelValue.name;
 };
 
-const mode = ref<"select" | "new">("select");
-
-const newActivityInitValue = {
-  id: "",
-  name: "",
-  color: "#079AE4",
-  nestedActivities: [],
-};
-const newActivity = ref<Activity>(newActivityInitValue);
-
 function onSelected(activity: Activity) {
   if (activity.id === "NEW_ACTIVITY") {
-    // emit("create-new-activity", {
-    //   name: query.value,
-    // });
-
-    newActivity.value.name = query.value;
-    mode.value = "new";
+    showAddActivityModal.value = true;
+    newActivityName.value = query.value;
   } else {
     emit("update:modelValue", activity);
     queryRaw.value = "";
-    newActivity.value = newActivityInitValue;
   }
 }
 
 const { add } = useActivitiesStore();
 
-function saveNewActivity() {
-  const activity = add(newActivity.value);
-  emit("update:modelValue", activity);
-  mode.value = "select";
+const showAddActivityModal = ref(false);
+const newActivityName = ref("");
+function onNewActivityCreated(activity: Activity) {
+  const newActivity = add(activity);
+  showAddActivityModal.value = false;
+  emit("update:modelValue", newActivity);
 }
 </script>
 
 <template>
+  <AddEditActivityModal
+    v-if="showAddActivityModal"
+    :initial-name="newActivityName"
+    @add-activity="onNewActivityCreated"
+    @close="showAddActivityModal = false"
+  />
   <Combobox
-    v-if="mode === 'select'"
     :model-value="modelValue"
     as="div"
     by="id"
@@ -176,61 +169,6 @@ function saveNewActivity() {
       </ComboboxOptions>
     </div>
   </Combobox>
-  <div v-else>
-    <div>New activity</div>
-    <div class="bg-gray-50 rounded-lg p-4 mt-2">
-      <div>
-        <label
-          for="email"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Name</label
-        >
-        <div class="mt-2">
-          <input
-            id="name"
-            v-model="newActivity.name"
-            type="text"
-            name="activity name"
-            class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholder="Read Pride and prejudice"
-            aria-describedby="name-description"
-          />
-        </div>
-        <p id="name-description" class="mt-2 text-sm text-gray-500">
-          The name of the activity.
-        </p>
-      </div>
-      <div>
-        <label
-          for="email"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Color</label
-        >
-        <div class="mt-2">
-          {{ newActivity.color }}
-          <input
-            id="color"
-            v-model="newActivity.color"
-            type="color"
-            name="color"
-            class="input block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholder=""
-            aria-describedby="start-time-description"
-          />
-        </div>
-
-        <ActivityPicker
-          v-model="newActivity.nestedActivities"
-          :activities="activities"
-          multiple
-        />
-      </div>
-    </div>
-    <button class="btn btn-sm" @click="mode = 'select'">Cancel</button>
-    <button class="btn btn-sm" @click="saveNewActivity">
-      Save new activity
-    </button>
-  </div>
 </template>
 
 <style scoped></style>

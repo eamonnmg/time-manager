@@ -13,10 +13,13 @@ import { storeToRefs } from "pinia";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";
 
 interface Props {
-  open: boolean;
   activity?: Activity;
+  initialName?: string;
 }
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  activity: undefined,
+  initialName: "",
+});
 const emit = defineEmits([
   "update:open",
   "addActivity",
@@ -34,7 +37,7 @@ const editMode = computed(() => {
 
 const localActivityObject = ref<Activity>({
   id: "",
-  name: "",
+  name: props.initialName,
   color: "#000000",
   nestedActivities: [],
 });
@@ -62,25 +65,10 @@ watch(editMode, (val) => {
   }
 });
 
-const name = ref("");
-const color = ref("bg-green-300");
-
 function close() {
-  emit("update:open", false);
   emit("close");
 }
-// const selectedActivities = ref([]);
 
-// const newActivity = computed<Activity>(() => {
-//   return {
-//     id: "",
-//     name: name.value,
-//     color: color.value,
-//     nestedActivities: [...selectedActivities.value],
-//   };
-// });
-
-//
 function addActvity() {
   emit("addActivity", localActivityObject.value);
 }
@@ -101,7 +89,7 @@ function submit() {
 }
 </script>
 <template>
-  <TransitionRoot as="template" :show="open">
+  <TransitionRoot as="template" :show="true">
     <Dialog as="div" class="relative z-10" @close="close">
       <TransitionChild
         as="template"
