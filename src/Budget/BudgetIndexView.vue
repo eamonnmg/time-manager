@@ -12,7 +12,10 @@ const showAddBudgetModal = ref(false);
 </script>
 
 <template>
-  <AddBudgetModal v-model:open="showAddBudgetModal"></AddBudgetModal>
+  <AddBudgetModal
+    v-if="showAddBudgetModal"
+    @close="showAddBudgetModal = false"
+  ></AddBudgetModal>
   <div class="flex h-full w-full flex-col">
     <AppHeader>
       <template #left>

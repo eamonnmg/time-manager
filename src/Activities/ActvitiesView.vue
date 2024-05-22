@@ -16,15 +16,20 @@ function editActivity(activity: Activity) {
     showAddActivityModal.value = true;
   });
 }
+
+function closeModal() {
+  showAddActivityModal.value = false;
+  selectedActivity.value = undefined;
+}
 </script>
 
 <template>
   <AddActivityModal
-    v-model:open="showAddActivityModal"
+    v-if="showAddActivityModal"
     :activity="selectedActivity"
     @add-activity="add"
     @edit-activity="edit"
-    @close="selectedActivity = undefined"
+    @close="closeModal"
   />
 
   <div class="flex h-full w-full flex-col">

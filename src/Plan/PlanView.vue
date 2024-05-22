@@ -152,9 +152,9 @@ const timeScale = computed(() => {
 <template>
   <TimeBlockActivityModal
     v-if="showTimeBlockActivityModal"
-    v-model:open="showTimeBlockActivityModal"
     :activities="activityStore.activities"
     :time-block="selectedTimeBlock"
+    @close="showTimeBlockActivityModal = false"
     @add-time-block="timeBlockStore.add"
     @edit-time-block="editTimeBlock"
     @remove-time-block="removeTimeBlock"
