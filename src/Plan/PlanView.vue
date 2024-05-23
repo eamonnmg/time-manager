@@ -65,6 +65,10 @@ const lastDayOfCurrentWeek = computed(() => {
   return lastDayOfWeek(currentDay.value);
 });
 
+const firstDayOfCurrentWeek = computed(() => {
+  return subDays(lastDayOfCurrentWeek.value, 6);
+});
+
 const showBudgetPeriodSideBar = ref(false);
 const toggleBudgetPeriodSidebar = useToggle(showBudgetPeriodSideBar);
 
@@ -163,12 +167,13 @@ const timeScale = computed(() => {
     <AppHeader ref="navContainer">
       <template #left>
         <h1 class="text-base font-semibold leading-6 text-gray-900">
-          <time datetime="2022-01-22">
+          <span v-if="view === 'day'">
             {{ format(currentDay, "MMM d, yyyy") }}
-            <span v-if="view === 'week'">
-              - {{ format(lastDayOfCurrentWeek, "MMM d, yyyy") }}</span
-            >
-          </time>
+          </span>
+          <span v-if="view === 'week'">
+            {{ format(firstDayOfCurrentWeek, "MMM d, yyyy") }} -
+            {{ format(lastDayOfCurrentWeek, "MMM d, yyyy") }}</span
+          >
         </h1>
         <p class="mt-1 h-6 text-sm text-gray-500">
           <span v-if="view === 'day'"> {{ format(currentDay, "eeee") }}</span>
