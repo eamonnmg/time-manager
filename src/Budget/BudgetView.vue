@@ -12,6 +12,7 @@ import DurationInput from "@/shared/components/DurationInput.vue";
 import BaseInput from "@/shared/components/BaseInput.vue";
 import BudgetActivityAllocationChart from "@/Budget/BudgetActivityAllocationChart.vue";
 import RadialProgress from "@/shared/components/RadialProgress.vue";
+import ActivateBudgetPeriodModal from "@/Budget/ActivateBudgetPeriodModal.vue";
 
 const budgetId = useRoute().params.budgetId as string;
 
@@ -48,18 +49,29 @@ function onActivitySelected(e) {
 }
 
 const budgetPeriodStore = useBudgetPeriodStore();
-function apply() {
-  if (budgetPeriodStore.activePeriod) {
-    alert("Another budget is currently active");
-  }
-  budgetPeriodStore.create({
-    budgetId: budgetId.toString(),
-    startDate: new Date(),
-  });
+const showActivateBudgetModal = ref(false);
+function activateBudgetPeriod() {
+  showActivateBudgetModal.value = true;
+  // if (budgetPeriodStore.activePeriod) {
+  //   alert("Another budget is currently active");
+  // }
+  // budgetPeriodStore.create({
+  //   budgetId: budgetId.toString(),
+  //   startDate: new Date(),
+  // });
 }
+
+const endBudgetPeriod = () => {
+  budgetPeriodStore.endActivePeriod();
+};
 </script>
 
 <template>
+  <ActivateBudgetPeriodModal
+    v-if="showActivateBudgetModal"
+    :budget="budget"
+    @close="showActivateBudgetModal = false"
+  />
   <div class="flex h-full w-full flex-col">
     <AppHeader>
       <template #left>
@@ -74,6 +86,9 @@ function apply() {
           <h1 class="text-xl font-semibold leading-6 text-gray-900">
             {{ budgetStore.getById(budgetId.toString()).name }}
           </h1>
+          <span v-if="budgetStore.isActive(budgetId)" class="badge badge-info"
+            >Active
+          </span>
         </div>
         <p class="mt-2 text-sm text-gray-700">
           A budget defines how you want to allocate your time for a period
@@ -83,11 +98,11 @@ function apply() {
         <button
           v-if="!budgetStore.isActive(budgetId)"
           class="btn btn-primary"
-          @click="apply"
+          @click="activateBudgetPeriod"
         >
           Activate
         </button>
-        <span v-else class="badge badge-info">Active</span>
+        <button v-else class="btn" @click="endBudgetPeriod">Deactivate</button>
       </template>
     </AppHeader>
     <!--    // activies-->

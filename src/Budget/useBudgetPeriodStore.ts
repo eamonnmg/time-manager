@@ -56,34 +56,16 @@ export const useBudgetPeriodStore = defineStore(
       tbActivities: Activity[],
       activityId: ModelId,
     ): Activity {
-      // if (activity.name === "golf") {
-      //   console.log("social", activity);
-      // }
-      // case 1: Timeblock activity matches the budget activity directly
-      // if (activity.id === activityId) {
-      //   return [activity];
-      // }
-
       const index = tbActivities.findIndex((tbAct) => tbAct.id === activityId);
       if (index !== -1) {
         return tbActivities[index];
       }
-      // case 2 timeBlock activity matches budget activity indirectly via nested activities
-      // if (tbActivities.nestedActivities.length) {
-      //   // for (const nestedActivity of activity.nestedActivities) {
-      //   //   return findActivity(nestedActivity, activityId);
-      //   // }
-      //
-      //     findActivity(activity.nestedActivities, activityId);
-      // }
 
       for (const act of tbActivities) {
         if (act.nestedActivities.length) {
           return findActivity(act.nestedActivities, activityId);
         }
       }
-      //   return findActivity(nestedActivity, activityId);
-      // }
 
       return undefined;
     }
@@ -118,12 +100,47 @@ export const useBudgetPeriodStore = defineStore(
       };
     });
 
-    function create(budgetPeriod: BudgetPeriodCreate) {
+    function create(newBudgetPeriod: BudgetPeriodCreate) {
       const id = self.crypto.randomUUID();
-      const budget = budgetStore.getById(budgetPeriod.budgetId);
+      const budget = budgetStore.getById(newBudgetPeriod.budgetId);
+      const endDate = addMilliseconds(
+        newBudgetPeriod.startDate,
+        budget.duration,
+      );
+      // ensure does not overlap an existing budget period
+
+      const overlapPeriod = budgetsPeriods.value.find((existingPeriod) => {
+        const existingPeriodEndDateIsWithinNewPeriod =
+          existingPeriod.endDate > newBudgetPeriod.startDate &&
+          endDate &&
+          existingPeriod.startDate <= endDate;
+        const newPeriodEndDateIsWithinExistingPeriod =
+          existingPeriod.startDate <= newBudgetPeriod.startDate &&
+          existingPeriod.endDate >= endDate;
+
+        const existingPeriodIsWithinNewPeriod =
+          existingPeriod.startDate >= newBudgetPeriod.startDate &&
+          existingPeriod.endDate <= endDate;
+        const existingPeriodStartDateIsWithinNewPeriod =
+          existingPeriod.startDate >= newBudgetPeriod.startDate &&
+          existingPeriod.startDate <= endDate;
+        return (
+          existingPeriodEndDateIsWithinNewPeriod ||
+          newPeriodEndDateIsWithinExistingPeriod ||
+          existingPeriodIsWithinNewPeriod ||
+          existingPeriodStartDateIsWithinNewPeriod
+        );
+      });
+
+      if (overlapPeriod) {
+        throw new Error(
+          "Budget period overlaps with another active budget period",
+        );
+      }
+
       budgetsPeriods.value.push({
-        ...budgetPeriod,
-        endDate: addMilliseconds(budgetPeriod.startDate, budget.duration),
+        ...newBudgetPeriod,
+        endDate,
         id,
       });
     }
@@ -139,6 +156,23 @@ export const useBudgetPeriodStore = defineStore(
       budgetsPeriods.value[targetIdx] = budgetPeriod;
     }
 
+    function endActivePeriod() {
+      if (!activePeriod.value) {
+        console.info("No active period");
+        return;
+      }
+
+      const targetIdx = budgetsPeriods.value.findIndex(
+        (bp) => bp.id === activePeriod.value.id,
+      );
+      if (targetIdx === -1) {
+        console.info("budget period not found");
+        return;
+      }
+
+      budgetsPeriods.value[targetIdx].endDate = new Date();
+    }
+
     return {
       budgetsPeriods,
       activePeriod,
@@ -147,6 +181,7 @@ export const useBudgetPeriodStore = defineStore(
       create,
       timeBlocksInActivePeriod,
       totalAllocatedTimeForBudgetActivityInPeriod,
+      endActivePeriod,
     };
   },
   {
