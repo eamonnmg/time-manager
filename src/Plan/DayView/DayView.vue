@@ -1,19 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import type { TimeBlockWithActivity } from "@/shared/types";
-import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { scaleTime } from "d3";
-import {
-  addSeconds,
-  endOfDay,
-  format,
-  isWithinInterval,
-  startOfDay,
-  subMilliseconds,
-  subMinutes,
-  subSeconds,
-} from "date-fns";
+import { endOfDay, format, isWithinInterval, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { usePointer, watchThrottled } from "@vueuse/core";
 import { hoursToMs, msToHours, msToMinutes } from "@/Budget/budgetUtils";
@@ -41,11 +31,9 @@ const emit = defineEmits([
 ]);
 
 const container = ref(null);
-const containerOffset = ref(null);
 const nowLine = ref(null);
 const timeBlockStore = useTimeBlockStore();
 
-const navHeight = 81;
 const dayHeightPx = 2800;
 
 const timeBlocks = computed<TimeBlockWithActivity[]>(() => {
@@ -61,19 +49,10 @@ onMounted(() => {
 });
 
 const timeScale = computed(() => {
-  // console.log("timeScale", [startOfDay(props.day), endOfDay(props.day)]);
   const start = startOfDay(props.day);
   const end = endOfDay(props.day);
   return scaleTime().domain([start, end]).range([0, dayHeightPx]);
 });
-
-//create timeblock at position
-// function onTimelineClick(e) {
-//   const time = timeScale.value.invert(e.offsetY + props.scrollPos);
-//
-//   emit("timelineClicked", time);
-//   // timeBlockStore.add(timeBlock);
-// }
 
 const ghostY = ref(0);
 const ghostTime = ref(new Date());
@@ -100,7 +79,6 @@ const targetGhostTime = computed(() => {
 
   // if use clicking and dragging then we lock time and extend duration of block
   if (isPointerDown.value) {
-    // return targetGhostTime.value;
     return ghostTime.value;
   }
 
@@ -236,10 +214,6 @@ const collisionBlockAbove = computed<TimeBlockWithActivity | undefined>(() => {
     const targetGhostEndDate = timeScale.value.invert(
       targetGhostY.value + targetGhostHeight.value,
     );
-    // return isWithinInterval(targetGhostStartDate, {
-    //   start: new Date(timeBlock.start),
-    //   end: getTimeBlockEnd(timeBlock),
-    // });
 
     return isDateRangeOverlappingDateRange(
       new Date(timeBlock.start),
@@ -426,28 +400,7 @@ const showTargetGhost = ref(false);
       /></span>
     </div>
     <div class="flex w-full flex-auto">
-      <!--      <div-->
-      <!--        class="flex-none bg-white"-->
-      <!--        :class="{-->
-      <!--          'w-14': showTimesInMargin,-->
-      <!--        }"-->
-      <!--      />-->
-      <!--      <div class="grid flex-auto grid-cols-1 grid-rows-1">-->
-      <!-- Horizontal lines -->
-
       <div class="relative w-full h-full">
-        <!--        <HourDividerLines-->
-        <!--          class="pointer-events-none"-->
-        <!--          :day="day"-->
-        <!--          :time-scale="timeScale"-->
-        <!--          :show-times="showTimesInMargin"-->
-        <!--        >-->
-        <!--          <template #offset>-->
-        <!--            <div ref="containerOffset" class="row-end-1 h-7"></div>-->
-        <!--          </template>-->
-        <!--        </HourDividerLines>-->
-
-        <!--        only show if is within view-->
         <div
           v-if="
             timeScale(new Date()) < dayHeightPx && timeScale(new Date()) > 0

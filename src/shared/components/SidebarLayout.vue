@@ -3,7 +3,11 @@ import {
   CalendarIcon,
   ChartPieIcon,
   WrenchScrewdriverIcon,
+  ChevronRightIcon,
+  ChevronLeftIcon,
 } from "@heroicons/vue/24/outline";
+import { useLayoutStore } from "@/shared/stores/useLayoutStore";
+
 const navigation = [
   { name: "Plan", href: "/", icon: CalendarIcon, current: true },
   {
@@ -14,11 +18,30 @@ const navigation = [
   },
   { name: "Budget", href: "/budgets", icon: ChartPieIcon, current: false },
 ];
+
+const layoutStore = useLayoutStore();
 </script>
 
 <template>
   <div class="h-screen flex">
-    <div class="h-full w-[330px] border-r border-gray-200">
+    <div
+      class="h-full relative border-r border-gray-200"
+      :class="{
+        'w-96': layoutStore.sidebarOpen,
+      }"
+    >
+      <button
+        class="absolute btn btn-circle text-sm btn-sm bottom-2 right-2"
+        @click="layoutStore.toggleSidebar"
+      >
+        <span class="sr-only">Toggle sidebar</span>
+        <ChevronRightIcon
+          class="size-4"
+          :class="{
+            'rotate-180': layoutStore.sidebarOpen,
+          }"
+        />
+      </button>
       <nav class="flex flex-1 flex-col p-4">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
           <li>
@@ -26,7 +49,9 @@ const navigation = [
               <li v-for="item in navigation" :key="item.name">
                 <router-link v-slot="{ isActive }" :to="item.href">
                   <div
+                    :data-tip="item.name"
                     :class="[
+                      !layoutStore.sidebarOpen ? 'tooltip tooltip-right' : '',
                       isActive
                         ? 'bg-gray-50 text-indigo-600'
                         : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
@@ -43,7 +68,7 @@ const navigation = [
                       ]"
                       aria-hidden="true"
                     />
-                    {{ item.name }}
+                    <span v-if="layoutStore.sidebarOpen">{{ item.name }}</span>
                   </div>
                 </router-link>
               </li>
