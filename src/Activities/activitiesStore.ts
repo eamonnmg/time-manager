@@ -2,41 +2,10 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import type { Activity, ModelId } from "@/shared/types";
 
-const reading = {
-  id: self.crypto.randomUUID(),
-  name: "Reading",
-  color: "bg-blue-300",
-  nestedActivities: [],
-};
-
-const philosohy = {
-  id: self.crypto.randomUUID(),
-  name: "philosohy",
-  color: "bg-grey-300",
-  nestedActivities: [],
-};
-
-const nonFiction = {
-  id: self.crypto.randomUUID(),
-  name: "Non-fiction",
-  color: "bg-green-300",
-  nestedActivities: [reading],
-};
-
-const crimeAndPunishment = {
-  id: self.crypto.randomUUID(),
-  name: "Crime and Punishment",
-  color: "bg-red-300",
-  nestedActivities: [nonFiction, philosohy],
-};
 export const useActivitiesStore = defineStore(
   "activities",
   () => {
-    const activities = ref<Activity[]>([
-      reading,
-      nonFiction,
-      crimeAndPunishment,
-    ]);
+    const activities = ref<Activity[]>([]);
 
     function getById(id: ModelId): Activity | undefined {
       return activities.value.find((a: Activity) => a.id === id);

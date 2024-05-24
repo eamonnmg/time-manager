@@ -6,6 +6,8 @@ import { storeToRefs } from "pinia";
 import ActivityPicker from "@/Activities/ActivityPicker.vue";
 import BaseModal from "@/shared/components/BaseModal.vue";
 import { useCloned } from "@vueuse/core";
+import ColorPicker from "@/shared/components/ColorPicker.vue";
+import activityColorPalatte from "@/shared/utils/activityColorPalatte";
 
 interface Props {
   activity?: Activity;
@@ -25,10 +27,12 @@ const editMode = computed(() => {
   return Boolean(props.activity);
 });
 
+const randomInitColor =
+  activityColorPalatte[Math.floor(Math.random() * activityColorPalatte.length)];
 const localActivityObject = ref<Activity>({
   id: "",
   name: props.initialName,
-  color: "#000000",
+  color: randomInitColor.value,
   nestedActivities: [],
 });
 
@@ -88,26 +92,19 @@ function submit() {
             aria-describedby="name-description"
           />
         </div>
-        <p id="name-description" class="mt-2 text-sm text-gray-500">
-          The name of the activity.
-        </p>
       </div>
-      <div>
-        <label
-          for="email"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Color</label
-        >
+      <div class="space-y-2">
         <div class="mt-2">
-          <input
-            id="color"
-            v-model="localActivityObject.color"
-            type="color"
-            name="color"
-            class="block input w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholder=""
-            aria-describedby="start-time-description"
-          />
+          <ColorPicker v-model="localActivityObject.color" />
+          <!--          <input-->
+          <!--            id="color"-->
+          <!--            v-model="localActivityObject.color"-->
+          <!--            type="color"-->
+          <!--            name="color"-->
+          <!--            class="block input w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"-->
+          <!--            placeholder=""-->
+          <!--            aria-describedby="start-time-description"-->
+          <!--          />-->
         </div>
 
         <ActivityPicker

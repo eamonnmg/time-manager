@@ -77,3 +77,10 @@ export interface BudgetPeriodCreate
 export interface BudgetPeriodWithBudget extends BudgetPeriod {
   budget: Budget;
 }
+
+export interface Color {
+  // hex value
+  value: string;
+  // readable name of color
+  name: string;
+}

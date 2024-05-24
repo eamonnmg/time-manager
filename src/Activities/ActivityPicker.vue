@@ -147,6 +147,7 @@ function onNewActivityCreated(activity: Activity) {
           >
             <div class="flex items-center">
               <div
+                v-if="activity.id !== 'NEW_ACTIVITY'"
                 class="badge h-6 w-6 flex-shrink-0 rounded-full"
                 :style="{ backgroundColor: activity.color }"
               />
