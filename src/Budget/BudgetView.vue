@@ -13,6 +13,7 @@ import BaseInput from "@/shared/components/BaseInput.vue";
 import BudgetActivityAllocationChart from "@/Budget/BudgetActivityAllocationChart.vue";
 import RadialProgress from "@/shared/components/RadialProgress.vue";
 import ActivateBudgetPeriodModal from "@/Budget/ActivateBudgetPeriodModal.vue";
+import { calcIdealTextColorFromBg } from "@/shared/utils/colors";
 
 const budgetId = useRoute().params.budgetId as string;
 
@@ -144,8 +145,11 @@ const endBudgetPeriod = () => {
               <td>{{ activity.activity.name }}</td>
               <td>
                 <RadialProgress
+                  class="radial-progress border-4"
                   :style="{
-                    color: activity.activity.color,
+                    color: calcIdealTextColorFromBg(activity.activity.color),
+                    background: activity.activity.color,
+                    borderColor: activity.activity.color,
                     '--size': '3rem',
                   }"
                   :value="

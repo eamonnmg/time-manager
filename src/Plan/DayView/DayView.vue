@@ -423,6 +423,8 @@ const showTargetGhost = ref(false);
           }"
         ></div>
 
+        <!--        visualise budget periods -->
+        <div class="absolute w-4 h-[300px] top-[100px] bg-blue-300"></div>
         <TimeBlocks
           :time-blocks="timeBlocks"
           :time-scale="timeScale"

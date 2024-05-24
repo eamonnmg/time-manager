@@ -134,6 +134,20 @@ function removeTimeBlock(timeBlock: TimeBlock) {
   selectedTimeBlock.value = undefined;
 }
 
+const budgetPeriods = computed(() => {
+  const startDate =
+    view.value === "day"
+      ? startOfDay(currentDay.value)
+      : startOfDay(firstDayOfCurrentWeek.value);
+  const endDate =
+    view.value === "day"
+      ? endOfDay(currentDay.value)
+      : endOfDay(lastDayOfCurrentWeek.value);
+  const result = budgetPeriodStore.budgetPeriodsWithinRange(startDate, endDate);
+  console.log("budgetPeriods", result);
+  return result;
+});
+
 const budgetActivityStore = useBudgetActivityStore();
 const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
   const budgetId = budgetPeriodStore.activePeriod?.budgetId;
@@ -163,6 +177,7 @@ const timeScale = computed(() => {
     @edit-time-block="editTimeBlock"
     @remove-time-block="removeTimeBlock"
   />
+  <p v-show="false">{{ budgetPeriods }}</p>
   <div class="flex h-full w-full flex-col">
     <AppHeader ref="navContainer">
       <template #left>

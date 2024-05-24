@@ -41,6 +41,24 @@ export const useBudgetPeriodStore = defineStore(
       };
     });
 
+    const budgetPeriodsWithinRange = computed(() => {
+      return (startDate: Date, endDate: Date): BudgetPeriodWithBudget[] => {
+        return budgetsPeriods.value
+          .filter((bp) => {
+            return (
+              new Date(bp.startDate) >= startDate &&
+              new Date(bp.endDate) <= endDate
+            );
+          })
+          .map((bp) => {
+            return {
+              ...bp,
+              budget: budgetStore.getById(bp.budgetId),
+            };
+          });
+      };
+    });
+
     const timeBlocksInActivePeriod = computed<TimeBlockWithActivity[]>(() => {
       if (!activePeriod.value) {
         return [];
@@ -182,6 +200,7 @@ export const useBudgetPeriodStore = defineStore(
       timeBlocksInActivePeriod,
       totalAllocatedTimeForBudgetActivityInPeriod,
       endActivePeriod,
+      budgetPeriodsWithinRange,
     };
   },
   {
