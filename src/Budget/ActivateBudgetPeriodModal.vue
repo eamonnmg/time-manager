@@ -17,14 +17,6 @@ const emit = defineEmits(["addBudget", "close"]);
 
 const startDateTime = ref("");
 
-const startDateText = computed(() => {
-  if (!startDateTime.value) {
-    return "";
-  }
-
-  return format(new Date(startDateTime.value), "dd/MM/yyyy HH:mm");
-});
-
 const endDateText = computed(() => {
   if (!startDateTime.value) {
     return "";
@@ -42,7 +34,7 @@ function activate() {
   try {
     budgetPeriodStore.create({
       budgetId: props.budget.id,
-      startDate: new Date(),
+      startDate: new Date(startDateTime.value),
     });
   } catch (e) {
     alert(e.message);

@@ -39,8 +39,7 @@ const remainingTime = computed(() => {
 
 const totalPercentageOfBudgetTimeAllocated = computed(() => {
   return (
-    ((budget.duration - remainingTime.value) /
-      (budget.duration - budget.occupiedTime)) *
+    ((budget.duration - remainingTime.value) / budget.duration) *
     100
   ).toFixed(0);
 });
@@ -96,14 +95,9 @@ const endBudgetPeriod = () => {
         </p>
       </template>
       <template #default>
-        <button
-          v-if="!budgetStore.isActive(budgetId)"
-          class="btn btn-primary"
-          @click="activateBudgetPeriod"
-        >
+        <button class="btn btn-primary" @click="activateBudgetPeriod">
           Activate
         </button>
-        <button v-else class="btn" @click="endBudgetPeriod">Deactivate</button>
       </template>
     </AppHeader>
     <!--    // activies-->

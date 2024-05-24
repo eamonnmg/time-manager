@@ -10,8 +10,28 @@ import type {
   TimeBlockWithActivity,
 } from "@/shared/types";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
-import { addMilliseconds } from "date-fns";
+import { addMilliseconds, areIntervalsOverlapping } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
+
+// function doesBudgetPeriodOverlapDateRange(budgetPeriod: BudgetPeriod, range) {
+//   const endDateIsWithinPeriod =
+//     endDate > budgetPeriod.startDate &&
+//     endDate &&
+//     budgetPeriod.startDate <= endDate;
+//   const newPeriodEndDateIsWithinExistingPeriod =
+//     budgetPeriod.startDate <= startDate && budgetPeriod.endDate >= endDate;
+//
+//   const existingPeriodIsWithinNewPeriod =
+//     budgetPeriod.startDate >= startDate && budgetPeriod.endDate <= endDate;
+//   const existingPeriodStartDateIsWithinNewPeriod =
+//     budgetPeriod.startDate >= startDate && budgetPeriod.startDate <= endDate;
+//   return (
+//     existingPeriodEndDateIsWithinNewPeriod ||
+//     newPeriodEndDateIsWithinExistingPeriod ||
+//     existingPeriodIsWithinNewPeriod ||
+//     existingPeriodStartDateIsWithinNewPeriod
+//   );
+// }
 
 export const useBudgetPeriodStore = defineStore(
   "budgetPeriods",
@@ -45,9 +65,15 @@ export const useBudgetPeriodStore = defineStore(
       return (startDate: Date, endDate: Date): BudgetPeriodWithBudget[] => {
         return budgetsPeriods.value
           .filter((bp) => {
-            return (
-              new Date(bp.startDate) >= startDate &&
-              new Date(bp.endDate) <= endDate
+            return areIntervalsOverlapping(
+              {
+                start: startDate,
+                end: endDate,
+              },
+              {
+                start: new Date(bp.startDate),
+                end: new Date(bp.endDate),
+              },
             );
           })
           .map((bp) => {

@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import type { TimeBlockWithActivity } from "@/shared/types";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
-import { scaleTime } from "d3";
+import { max, min, scaleTime } from "d3";
 import { endOfDay, format, isWithinInterval, startOfDay } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { usePointer, watchThrottled } from "@vueuse/core";
@@ -13,6 +13,7 @@ import {
   roundToNearest15Minutes,
   timeblocksBetweenDates,
 } from "@/Plan/DayView/utils";
+import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 
 interface Props {
   day: Date;
@@ -46,6 +47,35 @@ onMounted(() => {
       nowLine.value.scrollIntoView({ block: "center" });
     }, 200);
   }
+});
+
+const budgetPeriodStore = useBudgetPeriodStore();
+const budgetPeriods = computed(() => {
+  return budgetPeriodStore.budgetPeriodsWithinRange(
+    startOfDay(props.day),
+    endOfDay(props.day),
+  );
+});
+
+const budgetPeriodUiElements = computed(() => {
+  const result = budgetPeriods.value.map((period) => {
+    // use min and max fn st ensure that the period el is within the day
+    const y = timeScale.value(
+      max([new Date(period.startDate), startOfDay(props.day)]),
+    );
+    const end = timeScale.value(
+      min([new Date(period.endDate), endOfDay(props.day)]),
+    );
+    return {
+      y,
+      end,
+      height: end - y,
+    };
+  });
+
+  console.log("budgetPeriodUiElements", result);
+
+  return result;
 });
 
 const timeScale = computed(() => {
@@ -382,7 +412,7 @@ const showTargetGhost = ref(false);
 <template>
   <div
     ref="container"
-    class="flex test h-full flex-auto flex-col"
+    class="flex test h-full w-full flex-col"
     :style="`height: ${dayHeightPx}px`"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
@@ -424,7 +454,15 @@ const showTargetGhost = ref(false);
         ></div>
 
         <!--        visualise budget periods -->
-        <div class="absolute w-4 h-[300px] top-[100px] bg-blue-300"></div>
+        <div
+          v-for="bp in budgetPeriodUiElements"
+          :key="bp.y"
+          class="absolute w-4 bg-blue-100 opacity-80"
+          :style="{
+            transform: `translateY(${bp.y}px)`,
+            height: `${bp.height}px`,
+          }"
+        ></div>
         <TimeBlocks
           :time-blocks="timeBlocks"
           :time-scale="timeScale"

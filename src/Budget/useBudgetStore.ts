@@ -42,7 +42,13 @@ export const useBudgetStore = defineStore(
     // check budgetPeriods to see is this budget active?
     const isActive = computed(() => {
       return (budgetId: ModelId) => {
-        return budgetPeriodStore.activePeriod?.budgetId === budgetId;
+        {
+          return Boolean(
+            budgetPeriodStore.budgetsPeriods.find(
+              (bp) => bp.budgetId === budgetId,
+            ),
+          );
+        }
       };
     });
 
