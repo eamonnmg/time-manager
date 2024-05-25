@@ -476,13 +476,11 @@ const showTargetGhost = ref(false);
             height: `${bp.height}px`,
           }"
         ></div>
-        <div class="px-1">
-          <TimeBlocks
-            :time-blocks="timeBlocks"
-            :time-scale="timeScale"
-            @edit-time-block="$emit('editTimeBlock', $event)"
-          />
-        </div>
+        <TimeBlocks
+          :time-blocks="timeBlocks"
+          :time-scale="timeScale"
+          @edit-time-block="$emit('editTimeBlock', $event)"
+        />
         <div
           v-show="shouldShowNewTimeBlockGhost"
           class="absolute select-none cursor-pointer transition-transform duration-100 left-0 z-[2] w-full right-0 top-0 bottom-0 mt-px flex"

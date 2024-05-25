@@ -101,7 +101,7 @@ function timeBlockToDayViewTimeBlock(
     <li
       v-for="timeBlock in timeBlockViewObjs"
       :key="timeBlock.activity.name"
-      class="absolute cursor-pointer left-0 w-full right-0 top-0 bottom-0 mt-px flex"
+      class="absolute cursor-pointer py-[1px] px-0.5 left-0 w-full right-0 top-0 bottom-0 mt-px flex"
       :style="{
         height: `${timeBlock.height}px`,
         transform: `translateY(${timeBlock.y}px)`,
