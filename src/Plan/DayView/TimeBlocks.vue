@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { TimeBlockWithActivity } from "@/shared/types";
+import type { BudgetPeriod, TimeBlockWithActivity } from "@/shared/types";
 import { msToHours, msToMinutes } from "@/Budget/budgetUtils";
 import type { ScaleTime } from "d3";
 import { computed } from "vue";
 import { calcIdealTextColorFromBg } from "@/shared/utils/colors";
+import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 
 interface Props {
   timeBlocks: TimeBlockWithActivity[];
@@ -16,6 +17,8 @@ const emit = defineEmits([
   "pointerOverTimeBlock",
 ]);
 
+const timeblockStore = useTimeBlockStore();
+
 /**
  * The data structure for an activity in the day view.
  */
@@ -25,6 +28,7 @@ interface TimeBlockViewObj extends TimeBlockWithActivity {
   startTimeLabel: string;
   endTimeLabel: string;
   durationLabel: string;
+  budgetPeriod?: BudgetPeriod;
 }
 
 const props = defineProps<Props>();
@@ -86,6 +90,7 @@ function timeBlockToDayViewTimeBlock(
       minute: "2-digit",
     }),
     durationLabel: calcDurationLable(),
+    budgetPeriod: timeblockStore.getTimeBlockBudgetPeriod(timeBlock),
   };
 }
 </script>
@@ -103,16 +108,22 @@ function timeBlockToDayViewTimeBlock(
       }"
       @click="() => $emit('editTimeBlock', timeBlock)"
     >
-      <a
-        href="#"
+      <div
         :style="`background-color: ${
           timeBlock.activity.color
         }; color: ${calcIdealTextColorFromBg(timeBlock.activity.color)}`"
-        :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5`"
+        class="group relative size-full flex flex-col overflow-y-auto rounded-lg text-xs leading-5"
       >
-        <div class="flex justify-between w-full h-full">
+        <div
+          v-if="timeBlock.budgetPeriod"
+          data-tip="test"
+          class="bg-blue-300 px-1 text-[0.7rem] rounded-t-lg w-full border-b border-white"
+        >
+          {{ timeBlock.budgetPeriod.budget.name }}
+        </div>
+        <div class="flex flex-col justify-between p-2 w-full h-full">
           <div class="flex-col flex">
-            <p class="order-1 font-semibold">
+            <p class="font-semibold">
               {{ timeBlock.activity.name }}
             </p>
             <p class="">
@@ -121,13 +132,12 @@ function timeBlockToDayViewTimeBlock(
                 {{ timeBlock.endTimeLabel }}</time
               >
             </p>
-          </div>
-
-          <div>
-            {{ timeBlock.durationLabel }}
+            <div>
+              {{ timeBlock.durationLabel }}
+            </div>
           </div>
         </div>
-      </a>
+      </div>
     </li>
   </ol>
 </template>

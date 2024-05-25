@@ -457,7 +457,7 @@ const showTargetGhost = ref(false);
         <div
           v-for="bp in budgetPeriodUiElements"
           :key="bp.y"
-          class="absolute w-4 bg-blue-100 opacity-80"
+          class="absolute w-full bg-blue-100 opacity-20"
           :style="{
             transform: `translateY(${bp.y}px)`,
             height: `${bp.height}px`,
@@ -477,7 +477,7 @@ const showTargetGhost = ref(false);
           }"
         >
           <div
-            class="group bg-gray-50 absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5"
+            class="group bg-gray-100 absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5"
           >
             <div class="flex justify-between w-full h-full">
               <div class="flex-col flex">

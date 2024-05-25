@@ -13,6 +13,24 @@ import { useBudgetStore } from "@/Budget/useBudgetStore";
 import { addMilliseconds, areIntervalsOverlapping } from "date-fns";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 
+export function findActivity(
+  tbActivities: Activity[],
+  activityId: ModelId,
+): Activity {
+  const index = tbActivities.findIndex((tbAct) => tbAct.id === activityId);
+  if (index !== -1) {
+    return tbActivities[index];
+  }
+
+  for (const act of tbActivities) {
+    if (act.nestedActivities.length) {
+      return findActivity(act.nestedActivities, activityId);
+    }
+  }
+
+  return undefined;
+}
+
 // function doesBudgetPeriodOverlapDateRange(budgetPeriod: BudgetPeriod, range) {
 //   const endDateIsWithinPeriod =
 //     endDate > budgetPeriod.startDate &&
@@ -40,26 +58,26 @@ export const useBudgetPeriodStore = defineStore(
     const timeBlocksStore = useTimeBlockStore();
     const budgetsPeriods = ref<BudgetPeriod[]>([]);
 
-    function getById(id: string): BudgetPeriod | undefined {
+    function getById(id: ModelId): BudgetPeriod | undefined {
       return budgetsPeriods.value.find((b: BudgetPeriod) => b.id === id);
     }
 
     // there should only be one active period at a time
-    const activePeriod = computed<BudgetPeriodWithBudget | undefined>(() => {
-      const now = new Date();
-      const bp = budgetsPeriods.value.find((bp) => {
-        return new Date(bp.startDate) <= now && new Date(bp.endDate) > now;
-      });
-
-      if (!bp) {
-        return;
-      }
-
-      return {
-        ...bp,
-        budget: budgetStore.getById(bp.budgetId),
-      };
-    });
+    // const activePeriod = computed<BudgetPeriodWithBudget | undefined>(() => {
+    //   const now = new Date();
+    //   const bp = budgetsPeriods.value.find((bp) => {
+    //     return new Date(bp.startDate) <= now && new Date(bp.endDate) > now;
+    //   });
+    //
+    //   if (!bp) {
+    //     return;
+    //   }
+    //
+    //   return {
+    //     ...bp,
+    //     budget: budgetStore.getById(bp.budgetId),
+    //   };
+    // });
 
     const budgetPeriodsWithinRange = computed(() => {
       return (startDate: Date, endDate: Date): BudgetPeriodWithBudget[] => {
@@ -85,40 +103,26 @@ export const useBudgetPeriodStore = defineStore(
       };
     });
 
-    const timeBlocksInActivePeriod = computed<TimeBlockWithActivity[]>(() => {
-      if (!activePeriod.value) {
-        return [];
-      }
-
-      return timeBlocksStore.timeBlocksWithActivityForDateRange(
-        activePeriod.value.startDate,
-        activePeriod.value.endDate,
-      );
-    });
-
-    function findActivity(
-      tbActivities: Activity[],
-      activityId: ModelId,
-    ): Activity {
-      const index = tbActivities.findIndex((tbAct) => tbAct.id === activityId);
-      if (index !== -1) {
-        return tbActivities[index];
-      }
-
-      for (const act of tbActivities) {
-        if (act.nestedActivities.length) {
-          return findActivity(act.nestedActivities, activityId);
-        }
-      }
-
-      return undefined;
-    }
-    const timeBlocksForBudgetActivity = computed(() => {
-      return (activityId: ModelId) => {
-        if (!timeBlocksInActivePeriod.value.length) {
+    const timeBlocksInPeriod = computed(() => {
+      return (periodId: ModelId) => {
+        const period = getById(periodId);
+        if (!period) {
           return [];
         }
-        const x = timeBlocksInActivePeriod.value.filter((tb) => {
+        return timeBlocksStore.timeBlocksWithActivityForDateRange(
+          period.startDate,
+          period.endDate,
+        );
+      };
+    });
+
+    const timeBlocksForActivityInPeriod = computed(() => {
+      return (activityId: ModelId, periodId: ModelId) => {
+        const timeBlocks = timeBlocksInPeriod.value(periodId);
+        if (!timeBlocks.length) {
+          return [];
+        }
+        const x = timeBlocks.filter((tb) => {
           return Boolean(findActivity([tb.activity], activityId));
         });
 
@@ -128,14 +132,18 @@ export const useBudgetPeriodStore = defineStore(
     });
 
     const totalAllocatedTimeForBudgetActivityInPeriod = computed(() => {
-      return (budgetActivity: BudgetActivityWithActivity): number => {
+      return (
+        budgetActivity: BudgetActivityWithActivity,
+        periodId: ModelId,
+      ): number => {
         console.log(
           "budgetActivity",
           budgetActivity.activity.name,
           budgetActivity.activity.id,
         );
-        const timeBlocks = timeBlocksForBudgetActivity.value(
+        const timeBlocks = timeBlocksForActivityInPeriod.value(
           budgetActivity.activity.id,
+          periodId,
         );
         console.log("timeBlocks", timeBlocks);
         return timeBlocks.reduce((acc, tb) => {
@@ -200,32 +208,13 @@ export const useBudgetPeriodStore = defineStore(
       budgetsPeriods.value[targetIdx] = budgetPeriod;
     }
 
-    function endActivePeriod() {
-      if (!activePeriod.value) {
-        console.info("No active period");
-        return;
-      }
-
-      const targetIdx = budgetsPeriods.value.findIndex(
-        (bp) => bp.id === activePeriod.value.id,
-      );
-      if (targetIdx === -1) {
-        console.info("budget period not found");
-        return;
-      }
-
-      budgetsPeriods.value[targetIdx].endDate = new Date();
-    }
-
     return {
       budgetsPeriods,
-      activePeriod,
       edit,
       getById,
       create,
-      timeBlocksInActivePeriod,
+      timeBlocksForActivityInPeriod,
       totalAllocatedTimeForBudgetActivityInPeriod,
-      endActivePeriod,
       budgetPeriodsWithinRange,
     };
   },

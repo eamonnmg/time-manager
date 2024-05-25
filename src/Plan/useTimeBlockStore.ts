@@ -1,14 +1,20 @@
 import { computed, ref, watch } from "vue";
 import { defineStore } from "pinia";
-import type { ModelId, TimeBlock } from "@/shared/types";
+import type { ModelId, TimeBlock, TimeBlockWithActivity } from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { endOfDay, isWithinInterval, startOfDay, subMinutes } from "date-fns";
 import { getTimeBlockEnd } from "@/Plan/DayView/utils";
+import {
+  findActivity,
+  useBudgetPeriodStore,
+} from "@/Budget/useBudgetPeriodStore";
+import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 
 export const useTimeBlockStore = defineStore(
   "timeBlocks",
   () => {
     const activityStore = useActivitiesStore();
+    const budgetPeriodStore = useBudgetPeriodStore();
     const timeBlocks = ref<TimeBlock[]>([]);
 
     const timeBlocksWithActivity = computed(() => {
@@ -77,6 +83,33 @@ export const useTimeBlockStore = defineStore(
       );
     }
 
+    const budgetActivityStore = useBudgetActivityStore();
+    function getTimeBlockBudgetPeriod(timeblock: TimeBlockWithActivity) {
+      const timeblockEndDate = new Date(
+        new Date(timeblock.start).getTime() + timeblock.duration,
+      );
+      const budgetPeriod = budgetPeriodStore.budgetPeriodsWithinRange(
+        new Date(timeblock.start),
+        timeblockEndDate,
+      )[0];
+      if (!budgetPeriod) {
+        return null;
+      }
+      // check if timeblock contributes to the budget period activities
+      const activities = budgetActivityStore.getAllForBudget(
+        budgetPeriod.budget.id,
+      );
+      let matchingActivity = null;
+      for (const activity of activities) {
+        if (Boolean(findActivity([timeblock.activity], activity.activityId))) {
+          matchingActivity = activity;
+          break;
+        }
+      }
+
+      return Boolean(matchingActivity) ? budgetPeriod : null;
+    }
+
     return {
       timeBlocks,
       timeBlocksWithActivity,
@@ -85,6 +118,7 @@ export const useTimeBlockStore = defineStore(
       add,
       edit,
       remove,
+      getTimeBlockBudgetPeriod,
     };
   },
   {
