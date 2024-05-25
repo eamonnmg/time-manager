@@ -2,14 +2,18 @@
 import DayView from "@/Plan/DayView/DayView.vue";
 import { addDays, eachDayOfInterval, lastDayOfWeek, subDays } from "date-fns";
 import { computed } from "vue";
+import type { ModelId } from "@/shared/types";
 
 interface Props {
   lastDayOfWeek: Date;
   scrollPos: number;
   dayLabelHeight: number;
+  selectedBudgetPeriodId?: ModelId;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  selectedBudgetPeriodId: undefined,
+});
 
 const week = computed(() => {
   return eachDayOfInterval({
@@ -28,6 +32,7 @@ const week = computed(() => {
       :day-label-height="dayLabelHeight"
       :scroll-pos="scrollPos"
       :show-times-in-margin="index < 1"
+      :selected-budget-period-id="selectedBudgetPeriodId"
       @edit-time-block="$emit('editTimeBlock', $event)"
       @create-time-blocl-ghost-clicked="
         $emit('create-time-blocl-ghost-clicked', $event)

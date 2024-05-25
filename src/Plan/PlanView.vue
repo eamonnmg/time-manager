@@ -5,7 +5,6 @@ import DayView from "@/Plan/DayView/DayView.vue";
 import TimeBlockActivityModal from "@/Plan/TimeBlockActivityModal.vue";
 import {
   add,
-  eachDayOfInterval,
   endOfDay,
   format,
   lastDayOfWeek,
@@ -16,21 +15,21 @@ import {
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useTimeBlockStore } from "@/Plan/useTimeBlockStore";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid";
-import type { BudgetActivityWithActivity, TimeBlock } from "@/shared/types";
+import type {
+  BudgetActivityWithActivity,
+  BudgetPeriod,
+  TimeBlock,
+} from "@/shared/types";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
-import { msToHours, msToMinutes } from "../Budget/budgetUtils";
-import {
-  useLocalStorage,
-  useScroll,
-  useToggle,
-  type VueInstance,
-} from "@vueuse/core";
+import { msToHours } from "../Budget/budgetUtils";
+import { useLocalStorage, useScroll, type VueInstance } from "@vueuse/core";
 import { ChartPieIcon } from "@heroicons/vue/24/outline";
 import WeekView from "@/Plan/WeekView/WeekView.vue";
 import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import { scaleTime } from "d3";
 import TimeAxisLables from "@/Plan/DayView/TimeAxisLables.vue";
+import { usePlanUiStore } from "@/Plan/usePlanUiStore";
 
 const timeBlockStore = useTimeBlockStore();
 const budgetPeriodStore = useBudgetPeriodStore();
@@ -41,6 +40,8 @@ const dayHeightPx = ref(2800);
 // unfortunately it be passed around as it impacts px offsets
 const dayLabelHeight = ref(25);
 const navContainer = ref<VueInstance | null>(null);
+
+const planUiStore = usePlanUiStore();
 
 const { y: calendarScrollContainerScrollOffset } = useScroll(
   calendarScrollContainer,
@@ -69,8 +70,7 @@ const firstDayOfCurrentWeek = computed(() => {
   return subDays(lastDayOfCurrentWeek.value, 6);
 });
 
-const showBudgetPeriodSideBar = ref(false);
-const toggleBudgetPeriodSidebar = useToggle(showBudgetPeriodSideBar);
+const view = useLocalStorage<"day" | "week">("plan-view", "week");
 
 function nextDay() {
   currentDay.value = add(currentDay.value, { days: 1 });
@@ -154,22 +154,29 @@ const budgetPeriods = computed(() => {
   return result;
 });
 
-const budgetActivityStore = useBudgetActivityStore();
-const budgetActivities = computed<BudgetActivityWithActivity[]>(() => {
-  const budgetId = budgetPeriodStore.activePeriod?.budgetId;
-  if (!budgetId) {
+const selectedBudgetPeriod = ref<BudgetPeriod>(budgetPeriods.value[0]);
+
+const selectedBudgetPeriodActivities = computed(() => {
+  if (!selectedBudgetPeriod.value) {
     return [];
   }
+  const budgetId = selectedBudgetPeriod.value.budgetId;
+
   return budgetActivityStore.getAllForBudget(budgetId);
 });
 
-const view = useLocalStorage<"day" | "week">("plan-view", "week");
+const budgetActivityStore = useBudgetActivityStore();
+
 // date obj to create time scale
 const timeScaleDay = new Date();
 const timeScale = computed(() => {
   return scaleTime()
     .domain([startOfDay(timeScaleDay), endOfDay(timeScaleDay)])
     .range([0, 2800]);
+});
+
+const shouldShowBudgetInfoBtn = computed(() => {
+  return budgetPeriods.value.length > 0;
 });
 </script>
 
@@ -202,6 +209,17 @@ const timeScale = computed(() => {
         </p>
       </template>
       <div class="flex space-x-2 items-center">
+        <button
+          v-if="shouldShowBudgetInfoBtn"
+          type="button"
+          class="btn btn-sm btn-ghost"
+          @click="planUiStore.toggleBudgetPeriodSidebar"
+        >
+          {{ planUiStore.budgetPeriodSidebarOpen ? "Hide" : "Show" }} Budget
+          Info
+
+          <ChartPieIcon class="h-6 w-6" />
+        </button>
         <div class="join">
           <input
             id="day"
@@ -289,14 +307,6 @@ const timeScale = computed(() => {
       >
         Add timeblock
       </button>
-      <button
-        v-if="budgetPeriodStore.activePeriod"
-        type="button"
-        class="btn btn-sm btn-ghost"
-        @click="toggleBudgetPeriodSidebar()"
-      >
-        <ChartPieIcon class="h-6 w-6" />
-      </button>
     </AppHeader>
     <div
       ref="calendarScrollContainer"
@@ -322,6 +332,7 @@ const timeScale = computed(() => {
           :day="currentDay"
           :scroll-pos="scrollOffset"
           :day-label-height="dayLabelHeight"
+          :selected-budget-period-id="selectedBudgetPeriod?.id"
           @editTimeBlock="showEditTimeBlockModal"
           @timeline-clicked="createTimeBlockAtTime"
           @createTimeBloclGhostClicked="createTimeBlockFromGhost"
@@ -331,26 +342,24 @@ const timeScale = computed(() => {
           :scroll-pos="scrollOffset"
           :day-label-height="dayLabelHeight"
           :last-day-of-week="lastDayOfCurrentWeek"
+          :selected-budget-period-id="selectedBudgetPeriod?.id"
           @createTimeBloclGhostClicked="createTimeBlockFromGhost"
           @editTimeBlock="showEditTimeBlockModal"
         />
       </div>
 
       <div
-        v-if="budgetPeriodStore.activePeriod && showBudgetPeriodSideBar"
+        v-if="planUiStore.budgetPeriodSidebarOpen"
         class="sticky top-0 border-l p-4 overflow-auto border-gray-100 w-0 md:w-[400px]"
       >
         <h3 class="text-2xl flex items-center">
-          Active Budget
-          <button class="badge badge-accent ml-4">
-            {{ budgetPeriodStore.activePeriod.budget.name }}
-          </button>
+          {{ selectedBudgetPeriod.budget.name }}
         </h3>
 
         <div class="flex flex-col">
           <ul>
             <li
-              v-for="budgetActivity in budgetActivities"
+              v-for="budgetActivity in selectedBudgetPeriodActivities"
               :key="budgetActivity.id"
               class="flex justify-between"
             >
@@ -360,6 +369,7 @@ const timeScale = computed(() => {
                   msToHours(
                     budgetPeriodStore.totalAllocatedTimeForBudgetActivityInPeriod(
                       budgetActivity,
+                      selectedBudgetPeriod.id,
                     ),
                   )
                 }}

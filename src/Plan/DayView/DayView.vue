@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import type { TimeBlockWithActivity } from "@/shared/types";
+import type { ModelId, TimeBlockWithActivity } from "@/shared/types";
 import TimeBlocks from "@/Plan/DayView/TimeBlocks.vue";
 import { max, min, scaleTime } from "d3";
 import { endOfDay, format, isWithinInterval, startOfDay } from "date-fns";
@@ -14,16 +14,19 @@ import {
   timeblocksBetweenDates,
 } from "@/Plan/DayView/utils";
 import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
+import { usePlanUiStore } from "@/Plan/usePlanUiStore";
 
 interface Props {
   day: Date;
   showTimesInMargin?: boolean;
   scrollPos: number;
   dayLabelHeight: number;
+  selectedBudgetPeriodId?: ModelId;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showTimesInMargin: true,
+  selectedBudgetPeriodId: undefined,
 });
 const emit = defineEmits([
   "editTimeBlock",
@@ -34,6 +37,7 @@ const emit = defineEmits([
 const container = ref(null);
 const nowLine = ref(null);
 const timeBlockStore = useTimeBlockStore();
+const planUiStore = usePlanUiStore();
 
 const dayHeightPx = 2800;
 
@@ -67,6 +71,7 @@ const budgetPeriodUiElements = computed(() => {
       min([new Date(period.endDate), endOfDay(props.day)]),
     );
     return {
+      ...period,
       y,
       end,
       height: end - y,
@@ -457,7 +462,15 @@ const showTargetGhost = ref(false);
         <div
           v-for="bp in budgetPeriodUiElements"
           :key="bp.y"
-          class="absolute w-full bg-blue-100 opacity-20"
+          class="absolute w-full opacity-20"
+          :class="{
+            'bg-blue-100':
+              bp.id !== props.selectedBudgetPeriodId ||
+              !planUiStore.budgetPeriodSidebarOpen,
+            'bg-blue-400':
+              bp.id === props.selectedBudgetPeriodId &&
+              planUiStore.budgetPeriodSidebarOpen,
+          }"
           :style="{
             transform: `translateY(${bp.y}px)`,
             height: `${bp.height}px`,
