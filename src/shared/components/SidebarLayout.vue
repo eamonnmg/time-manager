@@ -3,7 +3,6 @@ import {
   CalendarIcon,
   ChartPieIcon,
   WrenchScrewdriverIcon,
-
 } from "@heroicons/vue/24/outline";
 import { useLayoutStore } from "@/shared/stores/useLayoutStore";
 import ToggleSidebarButton from "@/shared/components/ToggleSidebarButton.vue";

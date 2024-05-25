@@ -434,7 +434,7 @@ const showTargetGhost = ref(false);
         >- ghost <input v-model="showTargetGhost" type="checkbox"
       /></span>
     </div>
-    <div class="flex w-full flex-auto">
+    <div class="flex w-full">
       <div class="relative w-full h-full">
         <div
           v-if="
@@ -476,11 +476,13 @@ const showTargetGhost = ref(false);
             height: `${bp.height}px`,
           }"
         ></div>
-        <TimeBlocks
-          :time-blocks="timeBlocks"
-          :time-scale="timeScale"
-          @edit-time-block="$emit('editTimeBlock', $event)"
-        />
+        <div class="px-1">
+          <TimeBlocks
+            :time-blocks="timeBlocks"
+            :time-scale="timeScale"
+            @edit-time-block="$emit('editTimeBlock', $event)"
+          />
+        </div>
         <div
           v-show="shouldShowNewTimeBlockGhost"
           class="absolute select-none cursor-pointer transition-transform duration-100 left-0 z-[2] w-full right-0 top-0 bottom-0 mt-px flex"

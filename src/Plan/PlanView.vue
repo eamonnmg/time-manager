@@ -367,6 +367,7 @@ const shouldShowBudgetInfoBtn = computed(() => {
         />
       </div>
 
+      <!--      todo extract this sidebar to component-->
       <div
         v-if="planUiStore.budgetPeriodSidebarOpen"
         class="sticky top-0 border-l p-4 overflow-auto border-gray-100 w-0 md:w-[400px]"
