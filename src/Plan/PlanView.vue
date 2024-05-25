@@ -30,6 +30,7 @@ import HourDividerLines from "@/Plan/DayView/HourDividerLines.vue";
 import { scaleTime } from "d3";
 import TimeAxisLables from "@/Plan/DayView/TimeAxisLables.vue";
 import { usePlanUiStore } from "@/Plan/usePlanUiStore";
+import CloseButton from "@/shared/components/CloseButton.vue";
 
 const timeBlockStore = useTimeBlockStore();
 const budgetPeriodStore = useBudgetPeriodStore();
@@ -150,11 +151,29 @@ const budgetPeriods = computed(() => {
       ? endOfDay(currentDay.value)
       : endOfDay(lastDayOfCurrentWeek.value);
   const result = budgetPeriodStore.budgetPeriodsWithinRange(startDate, endDate);
-  console.log("budgetPeriods", result);
   return result;
 });
 
-const selectedBudgetPeriod = ref<BudgetPeriod>(budgetPeriods.value[0]);
+const selectedBudgetPeriodIndex = ref(0);
+const selectedBudgetPeriod = computed(() => {
+  return budgetPeriods.value[selectedBudgetPeriodIndex.value];
+});
+
+function selectPreviousBudgetPeriod() {
+  if (selectedBudgetPeriodIndex.value > 0) {
+    selectedBudgetPeriodIndex.value--;
+  } else {
+    selectedBudgetPeriodIndex.value = budgetPeriods.value.length - 1;
+  }
+}
+
+function selectNextBudgetPeriod() {
+  if (selectedBudgetPeriodIndex.value < budgetPeriods.value.length - 1) {
+    selectedBudgetPeriodIndex.value++;
+  } else {
+    selectedBudgetPeriodIndex.value = 0;
+  }
+}
 
 const selectedBudgetPeriodActivities = computed(() => {
   if (!selectedBudgetPeriod.value) {
@@ -352,18 +371,48 @@ const shouldShowBudgetInfoBtn = computed(() => {
         v-if="planUiStore.budgetPeriodSidebarOpen"
         class="sticky top-0 border-l p-4 overflow-auto border-gray-100 w-0 md:w-[400px]"
       >
-        <h3 class="text-2xl flex items-center">
-          {{ selectedBudgetPeriod.budget.name }}
-        </h3>
+        <div
+          class="flex items-center"
+          :class="{
+            'justify-between': budgetPeriods.length > 1,
+            'justify-center': budgetPeriods.length <= 1,
+          }"
+        >
+          <button
+            v-if="budgetPeriods.length > 1"
+            class="btn btn-circle btn-sm"
+            @click="selectPreviousBudgetPeriod"
+          >
+            <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
+          </button>
+          <h3 class="text-2xl flex items-center">
+            {{ selectedBudgetPeriod.budget.name }}
+          </h3>
+          <button
+            v-if="budgetPeriods.length > 1"
+            class="btn btn-circle btn-sm"
+            @click="selectNextBudgetPeriod"
+          >
+            <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
 
-        <div class="flex flex-col">
+        <div class="mt-4 flex flex-col">
           <ul>
             <li
               v-for="budgetActivity in selectedBudgetPeriodActivities"
               :key="budgetActivity.id"
               class="flex justify-between"
             >
-              <div>{{ budgetActivity.activity.name }}</div>
+              <div class="flex space-x-2 items-center">
+                <div
+                  class="size-4 rounded-full"
+                  :style="{
+                    backgroundColor: budgetActivity.activity.color,
+                  }"
+                ></div>
+                <span>{{ budgetActivity.activity.name }}</span>
+              </div>
               <div>
                 {{
                   msToHours(
@@ -378,6 +427,10 @@ const shouldShowBudgetInfoBtn = computed(() => {
             </li>
           </ul>
         </div>
+        <CloseButton
+          class="absolute bottom-2"
+          @click="planUiStore.toggleBudgetPeriodSidebar"
+        />
       </div>
     </div>
   </div>

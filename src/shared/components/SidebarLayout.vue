@@ -3,10 +3,10 @@ import {
   CalendarIcon,
   ChartPieIcon,
   WrenchScrewdriverIcon,
-  ChevronRightIcon,
-  ChevronLeftIcon,
+
 } from "@heroicons/vue/24/outline";
 import { useLayoutStore } from "@/shared/stores/useLayoutStore";
+import ToggleSidebarButton from "@/shared/components/ToggleSidebarButton.vue";
 
 const navigation = [
   { name: "Plan", href: "/", icon: CalendarIcon, current: true },
@@ -30,18 +30,11 @@ const layoutStore = useLayoutStore();
         'w-96': layoutStore.sidebarOpen,
       }"
     >
-      <button
-        class="absolute btn btn-circle text-sm btn-sm bottom-2 right-2"
+      <ToggleSidebarButton
+        class="absolute bottom-2 right-2"
+        :open="layoutStore.sidebarOpen"
         @click="layoutStore.toggleSidebar"
-      >
-        <span class="sr-only">Toggle sidebar</span>
-        <ChevronRightIcon
-          class="size-4"
-          :class="{
-            'rotate-180': layoutStore.sidebarOpen,
-          }"
-        />
-      </button>
+      />
       <nav class="flex flex-1 flex-col p-4">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
           <li>
