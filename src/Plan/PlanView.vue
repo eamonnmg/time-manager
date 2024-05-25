@@ -115,6 +115,7 @@ function createTimeBlockAtTime(time: Date) {
 }
 
 function createTimeBlockFromGhost(ghost) {
+  console.log("ghost", ghost);
   selectedTimeBlock.value = {
     start: ghost.time,
     duration: ghost.duration,
@@ -132,6 +133,11 @@ function editTimeBlock(timeBlock: TimeBlock) {
 function removeTimeBlock(timeBlock: TimeBlock) {
   timeBlockStore.remove(timeBlock);
   selectedTimeBlock.value = undefined;
+}
+
+function showAddTimeblockModal() {
+  selectedTimeBlock.value = undefined;
+  showTimeBlockActivityModal.value = true;
 }
 
 const budgetPeriods = computed(() => {
@@ -279,7 +285,7 @@ const timeScale = computed(() => {
       <button
         type="button"
         class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-        @click="showTimeBlockActivityModal = true"
+        @click="showAddTimeblockModal"
       >
         Add timeblock
       </button>

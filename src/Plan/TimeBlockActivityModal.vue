@@ -14,6 +14,7 @@ import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { minutesToMs, msToMinutes } from "@/Budget/budgetUtils";
 import { formatDate, useCloned } from "@vueuse/core";
 import BaseModal from "@/shared/components/BaseModal.vue";
+import { formatISO } from "date-fns";
 
 interface Props {
   activities: Activity[];
@@ -33,11 +34,11 @@ const editMode = computed<boolean>(() => {
 });
 
 const activity = ref<Activity>(undefined);
-const start = ref(new Date().toISOString().slice(0, 19));
+const start = ref(formatISO(new Date()).slice(0, -6));
 const duration = ref(minutesToMs(60));
 
 if (props.timeBlock && props.timeBlock.start) {
-  start.value = formatDate(new Date(props.timeBlock.start), "YYYY-MM-DDThh:mm");
+  start.value = formatISO(new Date(props.timeBlock.start)).slice(0, -6);
 }
 
 if (props.timeBlock && props.timeBlock.duration) {
@@ -46,7 +47,7 @@ if (props.timeBlock && props.timeBlock.duration) {
 
 if (editMode.value) {
   activity.value = activityStore.getById(props.timeBlock.activityId);
-  start.value = new Date(props.timeBlock.start).toISOString().slice(0, 19);
+  start.value = formatISO(new Date(props.timeBlock.start)).slice(0, -6);
   duration.value = props.timeBlock.duration;
 }
 

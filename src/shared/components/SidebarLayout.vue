@@ -16,7 +16,7 @@ const navigation = [
     icon: WrenchScrewdriverIcon,
     current: false,
   },
-  { name: "Budget", href: "/budgets", icon: ChartPieIcon, current: false },
+  { name: "Budgets", href: "/budgets", icon: ChartPieIcon, current: false },
 ];
 
 const layoutStore = useLayoutStore();
@@ -51,7 +51,9 @@ const layoutStore = useLayoutStore();
                   <div
                     :data-tip="item.name"
                     :class="[
-                      !layoutStore.sidebarOpen ? 'tooltip tooltip-right' : '',
+                      !layoutStore.sidebarOpen
+                        ? 'tooltip z-10 tooltip-right'
+                        : '',
                       isActive
                         ? 'bg-gray-50 text-indigo-600'
                         : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
