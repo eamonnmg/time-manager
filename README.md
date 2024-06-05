@@ -8,7 +8,7 @@ Inspired by ideas from books like [_Deep Work_](https://www.amazon.com/Deep-Work
 
 ### Demo
 
-_TimeBudget_ is still very early in development (expect bugs 🐛) but an rough MVP can be demoed [here](https://timeblock.netlify.app/). There is no backend yet so all data is stored locally in your browser.
+_TimeBudget_ is still very early in development but an rough MVP can be demoed [here](https://timeblock.netlify.app/). There is no backend yet so all data is stored locally in your browser.
 
 #### Video demo
 
