@@ -57,6 +57,7 @@ The core app is made with Typescript, Vue 3, and Tailwind CSS.
 - **Drag and drop** time blocks to move them around.
 - **Resize** time blocks by dragging the edges.
 - **Reports**: record if you actually spent time on the activities you planned.
+- **Responsive design**: users should at least be able to view and add time blocks on mobile devices.
 
 
 
