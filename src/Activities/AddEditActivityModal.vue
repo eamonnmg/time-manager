@@ -110,6 +110,7 @@ function submit() {
         <ActivityPicker
           v-model="localActivityObject.nestedActivities"
           :activities="activities"
+          label="Nested activities"
           multiple
         />
       </div>
