@@ -344,7 +344,6 @@ const updateGhost = () => {
   // if colliding with time block above and below
   // i.e. stuck between two time blocks
   // then the ghost time block should fill the space
-  // if (collisionBlockBelow.value && collisionBlockAbove.value) {
   if (!canTargetGhostFitBetweenTimeBlocks.value) {
     ghostTime.value = getTimeBlockEnd(nearestTimeBlockAbovePointer.value);
     ghostY.value = timeScale.value(ghostTime.value);
@@ -394,7 +393,7 @@ function createTimeblockFromGhost() {
   emit("createTimeBloclGhostClicked", newTimeBlockGhost.value);
 }
 
-function onPointerDown(e) {
+function onPointerDown() {
   pointerDown.value = true;
 }
 
@@ -404,7 +403,7 @@ function onPointerUp() {
   createTimeblockFromGhost();
 }
 
-function onPointerMove(e) {
+function onPointerMove() {
   if (isPointerDown.value) {
     isDraggingPointer.value = true;
   }

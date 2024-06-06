@@ -1,28 +1,13 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type {
-  Activity,
-  Budget,
   BudgetActivity,
   BudgetActivityWithActivity,
   ModelId,
-  TimeBlock,
 } from "@/shared/types";
 import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetStore } from "@/Budget/useBudgetStore";
 import { hoursToMs } from "@/Budget/budgetUtils";
-
-// const dayBudget: Budget = {
-//   id: "1",
-//   name: "Day",
-//   duration: 1000 * 60 * 60 * 24,
-// };
-//
-// const weekBudget: Budget = {
-//   id: "2",
-//   name: "Week",
-//   duration: 1000 * 60 * 60 * 24 * 7,
-// };
 
 export const useBudgetActivityStore = defineStore(
   "budgetActivities",

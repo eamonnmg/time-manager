@@ -22,8 +22,6 @@ const halfHourDividerLines = computed(() => {
     };
   });
 });
-
-// console.log(hourDividerLines);
 </script>
 
 <template>

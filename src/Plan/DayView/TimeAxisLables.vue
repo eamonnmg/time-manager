@@ -20,8 +20,6 @@ const hourLabels = computed(() => {
     };
   });
 });
-
-// console.log(hourDividerLines);
 </script>
 
 <template>

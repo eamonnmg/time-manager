@@ -31,26 +31,6 @@ export function findActivity(
   return undefined;
 }
 
-// function doesBudgetPeriodOverlapDateRange(budgetPeriod: BudgetPeriod, range) {
-//   const endDateIsWithinPeriod =
-//     endDate > budgetPeriod.startDate &&
-//     endDate &&
-//     budgetPeriod.startDate <= endDate;
-//   const newPeriodEndDateIsWithinExistingPeriod =
-//     budgetPeriod.startDate <= startDate && budgetPeriod.endDate >= endDate;
-//
-//   const existingPeriodIsWithinNewPeriod =
-//     budgetPeriod.startDate >= startDate && budgetPeriod.endDate <= endDate;
-//   const existingPeriodStartDateIsWithinNewPeriod =
-//     budgetPeriod.startDate >= startDate && budgetPeriod.startDate <= endDate;
-//   return (
-//     existingPeriodEndDateIsWithinNewPeriod ||
-//     newPeriodEndDateIsWithinExistingPeriod ||
-//     existingPeriodIsWithinNewPeriod ||
-//     existingPeriodStartDateIsWithinNewPeriod
-//   );
-// }
-
 export const useBudgetPeriodStore = defineStore(
   "budgetPeriods",
   () => {
@@ -61,23 +41,6 @@ export const useBudgetPeriodStore = defineStore(
     function getById(id: ModelId): BudgetPeriod | undefined {
       return budgetsPeriods.value.find((b: BudgetPeriod) => b.id === id);
     }
-
-    // there should only be one active period at a time
-    // const activePeriod = computed<BudgetPeriodWithBudget | undefined>(() => {
-    //   const now = new Date();
-    //   const bp = budgetsPeriods.value.find((bp) => {
-    //     return new Date(bp.startDate) <= now && new Date(bp.endDate) > now;
-    //   });
-    //
-    //   if (!bp) {
-    //     return;
-    //   }
-    //
-    //   return {
-    //     ...bp,
-    //     budget: budgetStore.getById(bp.budgetId),
-    //   };
-    // });
 
     const budgetPeriodsWithinRange = computed(() => {
       return (startDate: Date, endDate: Date): BudgetPeriodWithBudget[] => {

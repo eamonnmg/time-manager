@@ -7,7 +7,6 @@ import { useActivitiesStore } from "@/Activities/activitiesStore";
 import { useBudgetActivityStore } from "@/Budget/useBudgetActivityStore";
 import { computed, ref } from "vue";
 import { calcPercentageOfTimeAllocated, msToHours } from "@/Budget/budgetUtils";
-import { useBudgetPeriodStore } from "@/Budget/useBudgetPeriodStore";
 import DurationInput from "@/shared/components/DurationInput.vue";
 import BaseInput from "@/shared/components/BaseInput.vue";
 import BudgetActivityAllocationChart from "@/Budget/BudgetActivityAllocationChart.vue";
@@ -48,22 +47,10 @@ function onActivitySelected(e) {
   budgetActivityStore.add(budgetId.toString(), e.id);
 }
 
-const budgetPeriodStore = useBudgetPeriodStore();
 const showActivateBudgetModal = ref(false);
 function activateBudgetPeriod() {
   showActivateBudgetModal.value = true;
-  // if (budgetPeriodStore.activePeriod) {
-  //   alert("Another budget is currently active");
-  // }
-  // budgetPeriodStore.create({
-  //   budgetId: budgetId.toString(),
-  //   startDate: new Date(),
-  // });
 }
-
-const endBudgetPeriod = () => {
-  budgetPeriodStore.endActivePeriod();
-};
 </script>
 
 <template>
@@ -100,7 +87,7 @@ const endBudgetPeriod = () => {
         </button>
       </template>
     </AppHeader>
-    <!--    // activies-->
+    <!--     activities-->
     <div class="px-4 relative h-full divide-x space-x-4 flex">
       <div class="w-2/3 relative flex flex-col divide-y space-y-4">
         <div
@@ -240,17 +227,6 @@ const endBudgetPeriod = () => {
             <BaseInput id="budgetName" v-model="budget.name" type="text" />
           </div>
           <br />
-          <!--                    Duration Hours:-->
-          <!--                    <input-->
-          <!--                      :value="msToHours(budget.duration)"-->
-          <!--                      type="number"-->
-          <!--                      @input="-->
-          <!--                        budgetStore.setBudgetDurationInHours(-->
-          <!--                          budget.id,-->
-          <!--                          $event.target.value,-->
-          <!--                        )-->
-          <!--                      "-->
-          <!--                    />-->
           <DurationInput
             label="Duration"
             :milliseconds="budget.duration"
