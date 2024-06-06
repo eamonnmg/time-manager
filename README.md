@@ -23,16 +23,16 @@ A key design goal is to make creating timeblocks as frictionless as possible.
 
 - Unlike events in calendar apps like Google Calendar, only one time block can occupy a period of time.
 - Collision detection ensures that time blocks can easily be created beside eachother without overlapping.
-- Click and drag to set the duration of a time block
+- Click and drag to set the duration of a time block at creation.
 - Type ahead to quickly select existing activities or create a new one if a matching activity does not exist.
 
 #### Budgets and Nested Activities
 
 The next goal of the app is to help you _decide_ how to spend your time. 
 
-- This is done by intentionally setting a budget for different types of activities.
+- This is done by intentionally setting a time budget for different types of activities.
 
-- When a budget is created and activated, the app will show you how much time you have left to spend on that activity.
+- When a budget period is activated, the app will show you how much time you have left to allocate to that activity.
 
 - To make this more powerful, activities can be "nested" within each to create a hierarchy of activities. This allows you to create a budget of high level activities (e.g. "exercise", "work", "social" )  and then contribute to the budget by time blocking more specific activities (e.g. "running", "email", "meeting friends").
 
